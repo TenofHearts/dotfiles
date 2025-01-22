@@ -95,7 +95,7 @@ alias l='ls -CF'
 # some aliases added by me
 alias ga='git add'
 alias gc='git commit'
-alias gca = 'git commit -a'
+alias gca='git commit -a'
 alias gps='git push'
 alias gpl='git pull'
 alias glg='git log --all -graph --decorate'
