@@ -98,7 +98,7 @@ alias gc='git commit'
 alias gca='git commit -a'
 alias gps='git push'
 alias gpl='git pull'
-alias glg='git log --all -graph --decorate'
+alias glg='git log --all --graph --decorate'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -147,3 +147,25 @@ export NEMU_HOME=/home/ten_of_hearts/Programing/PA/ics2024/nemu
 export AM_HOME=/home/ten_of_hearts/Programing/PA/ics2024/abstract-machine
 
 export PATH="/usr/lib/ccache:$PATH"
+
+
+export OSH='/home/ten_of_hearts/.oh-my-bash'
+
+OSH_THEME="powerbash10k"
+
+OMB_USE_SUDO=true
+
+completions=(
+		git
+		ssh
+)
+
+plugins=(
+		git
+		bashmarks
+)
+
+source "$OSH"/oh-my-bash.sh
+
+OMB_PROMPT_SHOW_PYTHON_VENV=true
+THEME_SHOW_PYTHON=true
