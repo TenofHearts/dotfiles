@@ -98,7 +98,7 @@ alias gc='git commit'
 alias gca='git commit -a'
 alias gps='git push'
 alias gpl='git pull'
-alias glg='git log --all --graph --decorate'
+alias glg='git log --graph --decorate'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -161,7 +161,7 @@ completions=(
 )
 
 plugins=(
-		git
+#		git
 		bashmarks
 )
 
