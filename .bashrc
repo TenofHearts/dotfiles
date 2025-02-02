@@ -97,7 +97,7 @@ alias cls='clear'
 alias ga='git add'
 alias gc='git commit'
 alias gca='git commit -a'
-alias gps='git push'
+alias gpu='git push'
 alias gpl='git pull'
 alias glg='git log --graph --decorate'
 
