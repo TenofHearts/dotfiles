@@ -172,3 +172,6 @@ OMB_PROMPT_SHOW_PYTHON_VENV=true
 THEME_SHOW_PYTHON=true
 
 export NAVY_HOME=/home/ten_of_hearts/Programing/PA/ics2024/navy-apps
+
+alias cact='conda activate'
+alias cdac='conda deactivate'
