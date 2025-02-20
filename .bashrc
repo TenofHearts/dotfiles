@@ -88,8 +88,8 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
-alias ll='ls -ah'
-alias la='ls -A'
+alias ll='ls -lAh --color=auto'
+alias la='ls -Al'
 alias l='ls -CF'
 alias cls='clear'
 
@@ -149,29 +149,32 @@ export AM_HOME=/home/ten_of_hearts/Programing/PA/ics2024/abstract-machine
 
 export PATH="/usr/lib/ccache:$PATH"
 
+# export OSH='/home/ten_of_hearts/.oh-my-bash'
 
-export OSH='/home/ten_of_hearts/.oh-my-bash'
+# OSH_THEME="powerbash10k"
 
-OSH_THEME="powerbash10k"
+# OMB_USE_SUDO=true
 
-OMB_USE_SUDO=true
+# completions=(
+# 		git
+#	  	ssh
+# )
 
-completions=(
-		git
-		ssh
-)
+# plugins=(
+#	  	git
+#	 	  bashmarks
+# )
 
-plugins=(
-#		git
-		bashmarks
-)
+# source "$OSH"/oh-my-bash.sh
 
-source "$OSH"/oh-my-bash.sh
-
-OMB_PROMPT_SHOW_PYTHON_VENV=true
-THEME_SHOW_PYTHON=true
+# OMB_PROMPT_SHOW_PYTHON_VENV=true
+# THEME_SHOW_PYTHON=true
 
 export NAVY_HOME=/home/ten_of_hearts/Programing/PA/ics2024/navy-apps
 
 alias cact='conda activate'
 alias cdac='conda deactivate'
+
+export PATH=$PATH:/home/ten_of_hearts/.local/bin
+
+eval "$(oh-my-posh init bash --config ~/dotfiles/my_theme.omp.json)"

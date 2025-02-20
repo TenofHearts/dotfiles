@@ -1,0 +1,128 @@
+{
+    "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+    "blocks": [
+        {
+            "type": "prompt",
+            "alignment": "left",
+            "segments": [
+                {
+                    "properties": {
+                        "cache_duration": "none",
+                        "display_mode": "environment",
+                        "dispplay_default": true,
+                        "fetch_version": true,
+                        "fetch_virtual_env": true,
+                        "home_enabled": true,
+                        "postfix": " ",
+                        "prefix": "\ue235 "
+                    },
+                    "leading_diamond": "\ue0b2",
+                    "trailing_diamond": "\ue0b0",
+                    "template": " \ue235  {{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }}{{ .Full }}{{ end }}  ",
+                    "foreground": "#585858",
+                    "background": "#9ce8e8",
+                    "type": "python",
+                    "style": "diamond"
+                },
+                {
+                    "background": "#e88888",
+                    "foreground": "#585858",
+                    "style": "diamond",
+                    "template": " on {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046  {{ .Staging.String }}{{ end }} ",
+                    "trailing_diamond": "\ue0b0",
+                    "type": "git"
+                },
+                {
+                    "properties": {
+                        "always_enabled": true,
+                        "cache_duration": "none",
+                        "style": "austin"
+                    },
+                    "template": " \ueba2 {{ .FormattedMs }} ",
+                    "foreground": "#585858",
+                    "trailing_diamond": "\ue0b0",
+                    "background": "#aae196",
+                    "type": "executiontime",
+                    "style": "diamond"
+                }
+            ],
+            "newline": true
+        },
+        {
+            "type": "prompt",
+            "alignment": "left",
+            "segments": [
+                {
+                    "properties": {
+                        "cache_duration": "none"
+                    },
+                    "leading_diamond": "\ue0b2",
+                    "template": " Hi, {{ .UserName }} ",
+                    "foreground": "#f2f3f8",
+                    "trailing_diamond": "\ue0b0",
+                    "background": "#a364b1",
+                    "type": "session",
+                    "style": "diamond"
+                },
+                {
+                    "properties": {
+                        "cache_duration": "none",
+                        "folder_icon": "\u2026",
+                        "folder_separator_icon": " <transparent>\ue0b1</> ",
+                        "max_depth": 2,
+                        "style": "agnoster_short"
+                    },
+                    "template": " {{ .Path }} ",
+                    "foreground": "#f2f3f8",
+                    "powerline_symbol": "\ue0b0",
+                    "background": "#7091d2",
+                    "type": "path",
+                    "style": "powerline"
+                }
+            ],
+            "newline": true
+        },
+        {
+            "type": "prompt",
+            "alignment": "left",
+            "segments": [
+                {
+                    "properties": {
+                        "alpine": "\uf300",
+                        "arch": "\uf303",
+                        "cache_duration": "none",
+                        "centos": "\uf304",
+                        "debian": "\uf306",
+                        "elementary": "\uf309",
+                        "fedora": "\uf30a",
+                        "gentoo": "\uf30d",
+                        "linux": "\ue712",
+                        "macos": "\ue711",
+                        "manjaro": "\uf312",
+                        "mint": "\uf30f",
+                        "opensuse": "\uf314",
+                        "raspbian": "\uf315",
+                        "ubuntu": "\uf31c",
+                        "windows": "\ue70f"
+                    },
+                    "template": " {{ .Icon }} ",
+                    "foreground": "#94d479",
+                    "type": "os",
+                    "style": "plain"
+                },
+                {
+                    "properties": {
+                        "cache_duration": "none"
+                    },
+                    "template": "{{ if .Root }}#{{else}}>{{end}}",
+                    "foreground": "#94d479",
+                    "type": "text",
+                    "style": "plain"
+                }
+            ],
+            "newline": true
+        }
+    ],
+    "version": 3,
+    "final_space": true
+}
