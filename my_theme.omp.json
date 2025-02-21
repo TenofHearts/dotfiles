@@ -72,12 +72,12 @@
                         "max_depth": 2,
                         "style": "agnoster_short"
                     },
-                    "template": " {{ .Path }} ",
+                    "template": " \ue5ff {{ .Path }} ",
                     "foreground": "#f2f3f8",
-                    "powerline_symbol": "\ue0b0",
+                    "trailing_diamond": "\ue0b0",
                     "background": "#7091d2",
                     "type": "path",
-                    "style": "powerline"
+                    "style": "diamond"
                 }
             ],
             "newline": true
