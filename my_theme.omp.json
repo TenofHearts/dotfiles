@@ -20,12 +20,12 @@
                     "trailing_diamond": "\ue0b0",
                     "template": " \ue235  {{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }}{{ .Full }}{{ end }}  ",
                     "foreground": "#585858",
-                    "background": "#9ce8e8",
+                    "background": "#f2c6b4",
                     "type": "python",
                     "style": "diamond"
                 },
                 {
-                    "background": "#e88888",
+                    "background": "#f3e8cb",
                     "foreground": "#585858",
                     "style": "diamond",
                     "template": " on {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046  {{ .Staging.String }}{{ end }} ",
@@ -41,7 +41,7 @@
                     "template": " \ueba2 {{ .FormattedMs }} ",
                     "foreground": "#585858",
                     "trailing_diamond": "\ue0b0",
-                    "background": "#aae196",
+                    "background": "#99e1e5",
                     "type": "executiontime",
                     "style": "diamond"
                 }
@@ -58,9 +58,9 @@
                     },
                     "leading_diamond": "\ue0b2",
                     "template": " Hi, {{ .UserName }} ",
-                    "foreground": "#f2f3f8",
+                    "foreground": "#fff4e1",
                     "trailing_diamond": "\ue0b0",
-                    "background": "#a364b1",
+                    "background": "#6c5b7c",
                     "type": "session",
                     "style": "diamond"
                 },
@@ -68,14 +68,14 @@
                     "properties": {
                         "cache_duration": "none",
                         "folder_icon": "\u2026",
-                        "folder_separator_icon": " <transparent>\ue0b1</> ",
+                        "folder_separator_icon": " <#f8b595>\ue0b1</> ",
                         "max_depth": 2,
                         "style": "agnoster_short"
                     },
                     "template": " \ue5ff {{ .Path }} ",
-                    "foreground": "#f2f3f8",
+                    "foreground": "#fff4e1",
                     "trailing_diamond": "\ue0b0",
-                    "background": "#7091d2",
+                    "background": "#c06c84",
                     "type": "path",
                     "style": "diamond"
                 }
