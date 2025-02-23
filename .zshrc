@@ -93,3 +93,6 @@ ZSH_HIGHLIGHT_STYLES[path]='fg=182'
 ZSH_HIGHLIGHT_STYLES[alias]='fg=114'
 ZSH_HIGHLIGHT_STYLES[function]='fg=067'
 ZSH_HIGHLIGHT_STYLES[precommand]='fg=035, bold'
+
+# setopt autocd
+# setopt correct
