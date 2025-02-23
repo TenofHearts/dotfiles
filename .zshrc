@@ -86,3 +86,7 @@ autoload -U compinit && compinit -u
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /home/ten_of_hearts/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=041'
+ZSH_HIGHLIGHT_STYLES[command]='fg=166'
+ZSH_HIGHLIGHT_STYLES[path]='fg=182'
