@@ -101,7 +101,7 @@
                 {
                     "type": "text",
                     "style": "plain",
-                    "template": "╰",
+                    "template": "╰─",
                     "foreground": "#fff4e1"
                 },
                 {
@@ -123,7 +123,7 @@
                         "ubuntu": "\uf31c",
                         "windows": "\ue70f"
                     },
-                    "template": " {{ .Icon }} ",
+                    "template": "{{ .Icon }} ",
                     "foreground": "#94d479",
                     "type": "os",
                     "style": "plain"
