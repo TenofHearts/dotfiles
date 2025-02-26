@@ -33,8 +33,17 @@
                 {
                     "background": "#f3e8cb",
                     "foreground": "#585858",
+                    "background_templates": [
+                        "{{ if or (.Working.Changed) (.Staging.Changed) }}#c1dda8{{ end }}",
+                        "{{ if gt .Ahead 0 }}#e3e4a7{{ end }}",
+                        "{{ if gt .Behind 0 }}#cf827c{{ end }}"
+                    ],
+                    "properties": {
+                        "fetch_status": true,
+                        "commit_icon": "\uf417 "
+                    },
                     "style": "diamond",
-                    "template": " on {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046  {{ .Staging.String }}{{ end }} ",
+                    "template": " on {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}   {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }} ",
                     "trailing_diamond": "\ue0b0",
                     "type": "git"
                 },
