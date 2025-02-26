@@ -48,6 +48,14 @@
                     "type": "git"
                 },
                 {
+                    "type": "docker",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "foreground": "#585858",
+                    "background": "#c3bef0",
+                    "template": "  {{ .Context }} "
+                },
+                {
                     "properties": {
                         "always_enabled": true,
                         "cache_duration": "none",
