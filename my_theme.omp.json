@@ -87,7 +87,7 @@
                     },
                     "leading_diamond": "\ue0b2",
                     "template": " Hi, {{ .UserName }} ",
-                    "foreground": "#fff4e1",
+                    "foreground": "#e0d7c6",
                     "trailing_diamond": "\ue0b0",
                     "background": "#6c5b7c",
                     "type": "session",
@@ -115,7 +115,7 @@
                         "style": "agnoster_short"
                     },
                     "template": " \ue5ff {{ .Path }} ",
-                    "foreground": "#fff4e1",
+                    "foreground": "#e0d7c6",
                     "trailing_diamond": "\ue0b0",
                     "background": "#c06c84",
                     "type": "path",
