@@ -35,7 +35,7 @@
                     "foreground": "#585858",
                     "background_templates": [
                         "{{ if or (.Working.Changed) (.Staging.Changed) }}#c1dda8{{ end }}",
-                        "{{ if gt .Ahead 0 }}#e3e4a7{{ end }}",
+                        "{{ if gt .Ahead 0 }}#cadefc{{ end }}",
                         "{{ if gt .Behind 0 }}#cf827c{{ end }}"
                     ],
                     "properties": {
@@ -84,6 +84,19 @@
                     "background": "#6c5b7c",
                     "type": "session",
                     "style": "diamond"
+                },
+                {
+                    "type": "battery",
+                    "style": "diamond",
+                    "trailing_diamond": "",
+                    "foreground": "#e0d7c6",
+                    "background": "#88304e",
+                    "template": " Battery: {{ if not .Error }}{{ .Icon }} {{ .Percentage }}{{ end }}  ",
+                    "properties": {
+                        "discharging_icon": " ",
+                        "charging_icon": " ",
+                        "charged_icon": " "
+                    }
                 },
                 {
                     "properties": {
