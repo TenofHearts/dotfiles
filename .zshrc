@@ -96,3 +96,7 @@ ZSH_HIGHLIGHT_STYLES[precommand]='fg=035, bold'
 
 # setopt autocd
 # setopt correct
+
+export PATH="/home/ten_of_hearts/.elan/bin:$PATH"
+
+alias sprox='/home/ten_of_hearts/dotfiles/set_proxy.sh'
