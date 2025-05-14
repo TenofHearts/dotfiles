@@ -96,3 +96,12 @@ ZSH_HIGHLIGHT_STYLES[precommand]='fg=035, bold'
 
 # setopt autocd
 # setopt correct
+
+if command -v fortune > /dev/null && command -v cowsay > /dev/null; then
+		# export COWPATH="$HOME/dotfiles/.cowsay:$COWPATH"
+		if command -v lolcat > /dev/null; then
+				fortune | cowsay -f ~/dotfiles/.cowsay/stegosaurus_and_cat.cow | lolcat
+		else
+    		fortune | cowsay -f ~/dotfiles/.cowsay/stegosaurus_and_cat.cow 
+		fi
+fi
