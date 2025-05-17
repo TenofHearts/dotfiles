@@ -109,3 +109,11 @@ if command -v fortune > /dev/null && command -v cowsay > /dev/null; then
     		fortune | cowsay -f ~/dotfiles/.cowsay/stegosaurus_and_cat.cow 
 		fi
 fi
+
+if [ -x /usr/local/cuda-12.9/bin/nvcc ] && [[ ":$PATH:" != *":/usr/local/cuda-12.9/bin:"* ]]; then
+  # echo "✅ CUDA env not yet set, now exporting..."
+  export PATH=/usr/local/cuda-12.9/bin:$PATH
+  export LD_LIBRARY_PATH=/usr/local/cuda-12.9/lib64:$LD_LIBRARY_PATH
+  export CUDA_HOME=/usr/local/cuda-12.9
+fi
+
