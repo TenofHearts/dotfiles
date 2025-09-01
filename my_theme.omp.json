@@ -49,8 +49,8 @@
                 },
                 {
                     "type": "docker",
-                    "style": "powerline",
-                    "powerline_symbol": "",
+                    "style": "diamond",
+                    "trailing_diamond": "\ue0b0",
                     "foreground": "#585858",
                     "background": "#c3bef0",
                     "template": "  {{ .Context }} "
