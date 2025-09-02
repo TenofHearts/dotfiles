@@ -1,3 +1,13 @@
+# User configuration and path setup
+# Get current user info for robust path handling
+USER_HOME="${HOME:-/home/$USER}"
+USER_NAME="${USER:-$(whoami)}"
+
+# Validate user home directory exists
+if [[ ! -d "$USER_HOME" ]]; then
+    echo "Warning: User home directory $USER_HOME does not exist"
+fi
+
 # Set up the prompt
 
 autoload -Uz promptinit
@@ -50,42 +60,61 @@ alias gpu='git push'
 alias gpl='git pull'
 alias glg='git log --graph --decorate'
 
-export PATH=$PATH:/home/ten_of_hearts/miniconda3/bin/
+# Add miniconda to PATH if it exists
+MINICONDA_PATH="$USER_HOME/miniconda3/bin"
+if [[ -d "$MINICONDA_PATH" ]]; then
+    export PATH=$PATH:$MINICONDA_PATH
+fi
 
-export NEMU_HOME=/home/ten_of_hearts/Programing/PA/ics2024/nemu
-export AM_HOME=/home/ten_of_hearts/Programing/PA/ics2024/abstract-machine
+export NEMU_HOME="$USER_HOME/Programing/PA/ics2024/nemu"
+export AM_HOME="$USER_HOME/Programing/PA/ics2024/abstract-machine"
 export PATH="/usr/lib/ccache:$PATH"
 
-export NAVY_HOME=/home/ten_of_hearts/Programing/PA/ics2024/navy-apps
+export NAVY_HOME="$USER_HOME/Programing/PA/ics2024/navy-apps"
 
 alias cact='conda activate'
 alias cdac='conda deactivate'
 
-export PATH=$PATH:/home/ten_of_hearts/.local/bin
+# Add local bin to PATH if it exists
+LOCAL_BIN_PATH="$USER_HOME/.local/bin"
+if [[ -d "$LOCAL_BIN_PATH" ]]; then
+    export PATH=$PATH:$LOCAL_BIN_PATH
+fi
 
 eval "$(oh-my-posh init zsh --config ~/dotfiles/my_theme.omp.json)"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/ten_of_hearts/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+CONDA_BIN="$USER_HOME/miniconda3/bin/conda"
+__conda_setup="$('$CONDA_BIN' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/ten_of_hearts/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/ten_of_hearts/miniconda3/etc/profile.d/conda.sh"
+    CONDA_PROFILE="$USER_HOME/miniconda3/etc/profile.d/conda.sh"
+    if [ -f "$CONDA_PROFILE" ]; then
+        . "$CONDA_PROFILE"
     else
-        export PATH="/home/ten_of_hearts/miniconda3/bin:$PATH"
+        MINICONDA_BIN="$USER_HOME/miniconda3/bin"
+        if [[ -d "$MINICONDA_BIN" ]]; then
+            export PATH="$MINICONDA_BIN:$PATH"
+        fi
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-[[ -s /home/ten_of_hearts/.autojump/etc/profile.d/autojump.sh ]] && source /home/ten_of_hearts/.autojump/etc/profile.d/autojump.sh
+# Load autojump if available
+AUTOJUMP_SCRIPT="$USER_HOME/.autojump/etc/profile.d/autojump.sh"
+[[ -s "$AUTOJUMP_SCRIPT" ]] && source "$AUTOJUMP_SCRIPT"
 
 autoload -U compinit && compinit -u
 
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /home/ten_of_hearts/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Load zsh plugins if available
+ZSH_AUTOSUGGESTIONS="$USER_HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
+ZSH_HIGHLIGHTING="$USER_HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+[[ -f "$ZSH_AUTOSUGGESTIONS" ]] && source "$ZSH_AUTOSUGGESTIONS"
+[[ -f "$ZSH_HIGHLIGHTING" ]] && source "$ZSH_HIGHLIGHTING"
 
 ZSH_HIGHLIGHT_STYLES[builtin]='fg=114'
 ZSH_HIGHLIGHT_STYLES[command]='fg=114'
@@ -97,16 +126,18 @@ ZSH_HIGHLIGHT_STYLES[precommand]='fg=035, bold'
 # setopt autocd
 # setopt correct
 
-# export PATH="/home/ten_of_hearts/.elan/bin:$PATH"
+# export PATH="$USER_HOME/.elan/bin:$PATH"
 
-# alias sprox='/home/ten_of_hearts/dotfiles/set_proxy.sh'
+# alias sprox='$USER_HOME/dotfiles/set_proxy.sh'
 
+# Display welcome message if fortune and cowsay are available
 if command -v fortune > /dev/null && command -v cowsay > /dev/null; then
-		# export COWPATH="$HOME/dotfiles/.cowsay:$COWPATH"
+		# export COWPATH="$USER_HOME/dotfiles/.cowsay:$COWPATH"
+		COWSAY_FILE="$USER_HOME/dotfiles/.cowsay/stegosaurus_and_cat.cow"
 		if command -v lolcat > /dev/null; then
-				fortune | cowsay -f ~/dotfiles/.cowsay/stegosaurus_and_cat.cow | lolcat
+				[[ -f "$COWSAY_FILE" ]] && fortune | cowsay -f "$COWSAY_FILE" | lolcat
 		else
-    		fortune | cowsay -f ~/dotfiles/.cowsay/stegosaurus_and_cat.cow 
+    		[[ -f "$COWSAY_FILE" ]] && fortune | cowsay -f "$COWSAY_FILE"
 		fi
 fi
 
