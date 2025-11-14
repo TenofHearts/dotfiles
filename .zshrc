@@ -148,3 +148,10 @@ if [ -x /usr/local/cuda-12.9/bin/nvcc ] && [[ ":$PATH:" != *":/usr/local/cuda-12
   export CUDA_HOME=/usr/local/cuda-12.9
 fi
 
+export GEM_HOME="$USER_HOME/.gem"
+export PATH="$USER_HOME/.gem/bin:$PATH"
+
+# export web ports
+export http_proxy=http://127.0.0.1:7897
+export https_proxy=http://127.0.0.1:7897
+export all_proxy=http://127.0.0.1:7897
