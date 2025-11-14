@@ -85,19 +85,14 @@ eval "$(oh-my-posh init zsh --config ~/dotfiles/my_theme.omp.json)"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-CONDA_BIN="$USER_HOME/miniconda3/bin/conda"
-__conda_setup="$('$CONDA_BIN' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$( "$USER_HOME/miniconda3/bin/conda" shell.zsh hook 2> /dev/null )"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    CONDA_PROFILE="$USER_HOME/miniconda3/etc/profile.d/conda.sh"
-    if [ -f "$CONDA_PROFILE" ]; then
-        . "$CONDA_PROFILE"
+    if [ -f "$USER_HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "$USER_HOME/miniconda3/etc/profile.d/conda.sh"
     else
-        MINICONDA_BIN="$USER_HOME/miniconda3/bin"
-        if [[ -d "$MINICONDA_BIN" ]]; then
-            export PATH="$MINICONDA_BIN:$PATH"
-        fi
+        export PATH="$USER_HOME/miniconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup
