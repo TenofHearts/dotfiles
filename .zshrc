@@ -81,7 +81,7 @@ if [[ -d "$LOCAL_BIN_PATH" ]]; then
     export PATH=$PATH:$LOCAL_BIN_PATH
 fi
 
-eval "$(oh-my-posh init zsh --config ~/dotfiles/my_theme.omp.json)"
+eval "$(oh-my-posh init zsh --config $USER_HOME/dotfiles/my_theme.omp.json)"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
