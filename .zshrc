@@ -157,8 +157,11 @@ if [[ -d "$UV_HOME" ]]; then
     }
 fi
 
-export GEM_HOME="$USER_HOME/.gem"
-export PATH="$USER_HOME/.gem/bin:$PATH"
+GEM_HOME="$USER_HOME/.gem"
+if [[ -d "$GEM_HOME" ]]; then
+    export GEM_HOME="$USER_HOME/.gem"
+    export PATH="$USER_HOME/.gem/bin:$PATH"
+fi
 
 # export web ports
 export http_proxy=http://127.0.0.1:7897
