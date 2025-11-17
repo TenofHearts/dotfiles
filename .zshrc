@@ -137,9 +137,22 @@ if command -v fortune > /dev/null && command -v cowsay > /dev/null; then
 fi
 
 if [ -x /usr/local/cuda-12.9/bin/nvcc ] && [[ ":$PATH:" != *":/usr/local/cuda-12.9/bin:"* ]]; then
-  # echo "✅ CUDA env not yet set, now exporting..."
-  export PATH=/usr/local/cuda-12.9/bin:$PATH
-  export LD_LIBRARY_PATH=/usr/local/cuda-12.9/lib64:$LD_LIBRARY_PATH
-  export CUDA_HOME=/usr/local/cuda-12.9
+    # echo "✅ CUDA env not yet set, now exporting..."
+    export PATH=/usr/local/cuda-12.9/bin:$PATH
+    export LD_LIBRARY_PATH=/usr/local/cuda-12.9/lib64:$LD_LIBRARY_PATH
+    export CUDA_HOME=/usr/local/cuda-12.9
 fi
 
+UV_HOME="$USER_HOME/.local/bin"
+if [[ -d "$UV_HOME" ]]; then
+    export PATH="$UV_HOME:$PATH"
+    eval "$(uv generate-shell-completion zsh)"
+    eval "$(uvx --generate-shell-completion zsh)"
+    function uvac() {
+        if [[ -d ".venv" ]]; then
+            source .venv/bin/activate
+        else
+            echo "\033[0;31mNo .venv directory found in the current path.\033[0m"
+        fi
+    }
+fi
