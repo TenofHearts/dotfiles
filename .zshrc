@@ -157,6 +157,8 @@ if [[ -d "$UV_HOME" ]]; then
     }
 fi
 
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
 GEM_HOME="$USER_HOME/.gem"
 if [[ -d "$GEM_HOME" ]]; then
     export GEM_HOME="$USER_HOME/.gem"
