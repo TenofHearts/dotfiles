@@ -155,6 +155,14 @@ if [[ -d "$UV_HOME" ]]; then
             echo "\033[0;31mNo .venv directory found in the current path.\033[0m"
         fi
     }
+    function my-uv-init() {
+        uv init --no-readme "$@"
+        [[ -f "hello.py" ]] && rm hello.py
+    }
+
+    alias uva="uv add"
+    alias uvr="uv run"
+    alias uvi="my-uv-init"
 fi
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
