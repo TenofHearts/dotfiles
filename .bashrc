@@ -178,3 +178,5 @@ alias cdac='conda deactivate'
 export PATH=$PATH:/home/ten_of_hearts/.local/bin
 
 eval "$(oh-my-posh init bash --config ~/dotfiles/my_theme.omp.json)"
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init - bash)"

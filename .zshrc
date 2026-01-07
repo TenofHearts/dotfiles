@@ -102,6 +102,10 @@ unset __conda_setup
 AUTOJUMP_SCRIPT="$USER_HOME/.autojump/etc/profile.d/autojump.sh"
 [[ -s "$AUTOJUMP_SCRIPT" ]] && source "$AUTOJUMP_SCRIPT"
 
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init - zsh)"
+FPATH="$(rbenv root)/completions":"$FPATH"
+
 autoload -U compinit && compinit -u
 
 # Load zsh plugins if available
@@ -166,13 +170,14 @@ fi
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-GEM_HOME="$USER_HOME/.gem"
-if [[ -d "$GEM_HOME" ]]; then
-    export GEM_HOME="$USER_HOME/.gem"
-    export PATH="$USER_HOME/.gem/bin:$PATH"
-fi
+# GEM_HOME="$USER_HOME/.gem"
+# if [[ -d "$GEM_HOME" ]]; then
+#     export GEM_HOME="$USER_HOME/.gem"
+#     export PATH="$USER_HOME/.gem/bin:$PATH"
+# fi
 
 # export web ports
 export http_proxy=http://127.0.0.1:7897
 export https_proxy=http://127.0.0.1:7897
 export all_proxy=http://127.0.0.1:7897
+
