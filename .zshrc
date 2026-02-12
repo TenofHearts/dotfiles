@@ -160,8 +160,10 @@ if [[ -d "$UV_HOME" ]]; then
         fi
     }
     function uvi() {
+        local had_main_py=0
+        [[ -f "main.py" ]] && had_main_py=1
         uv init --no-readme "$@"
-        [[ -f "hello.py" ]] && rm hello.py
+        [[ $had_main_py -eq 0 && -f "main.py" ]] && rm main.py
     }
 
     alias uva="uv add"
