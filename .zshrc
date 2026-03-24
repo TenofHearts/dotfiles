@@ -183,3 +183,11 @@ export http_proxy=http://127.0.0.1:7897
 export https_proxy=http://127.0.0.1:7897
 export all_proxy=http://127.0.0.1:7897
 
+
+# fnm
+FNM_PATH="/home/ten_of_hearts/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --shell zsh)"
+fi
+eval "$(fnm env --use-on-cd --shell zsh)"
