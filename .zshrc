@@ -162,7 +162,7 @@ if [[ -d "$UV_HOME" ]]; then
     function uvi() {
         local had_main_py=0
         [[ -f "main.py" ]] && had_main_py=1
-        uv init --no-readme "$@"
+        uv init --no-readme --vsc none "$@"
         [[ $had_main_py -eq 0 && -f "main.py" ]] && rm main.py
     }
 
