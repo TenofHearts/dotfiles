@@ -162,7 +162,7 @@ if [[ -d "$UV_HOME" ]]; then
     function uvi() {
         local had_main_py=0
         [[ -f "main.py" ]] && had_main_py=1
-        uv init --no-readme "$@"
+        uv init --no-readme --vsc none "$@"
         [[ $had_main_py -eq 0 && -f "main.py" ]] && rm main.py
     }
 
@@ -191,6 +191,7 @@ if [ -d "$FNM_PATH" ]; then
   eval "$(fnm env --shell zsh)"
 fi
 eval "$(fnm env --use-on-cd --shell zsh)"
+
 # >>> vscode python
 # version: 0.1.1
 if [ -z "$VSCODE_PYTHON_AUTOACTIVATE_GUARD" ]; then
