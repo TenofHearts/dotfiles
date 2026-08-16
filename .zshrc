@@ -1,7 +1,7 @@
 # User configuration and path setup
 # Get current user info for robust path handling
-USER_HOME="${HOME:-/home/$USER}"
 USER_NAME="${USER:-$(whoami)}"
+USER_HOME="${HOME:-/home/$USER}"
 
 # Validate user home directory exists
 if [[ ! -d "$USER_HOME" ]]; then
