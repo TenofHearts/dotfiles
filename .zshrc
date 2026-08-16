@@ -1,7 +1,7 @@
 # User configuration and path setup
 # Get current user info for robust path handling
-USER_HOME="${HOME:-/home/$USER}"
 USER_NAME="${USER:-$(whoami)}"
+USER_HOME="${HOME:-/home/$USER}"
 
 # Validate user home directory exists
 if [[ ! -d "$USER_HOME" ]]; then
@@ -185,7 +185,7 @@ export all_proxy=http://127.0.0.1:7897
 
 
 # fnm
-FNM_PATH="/home/ten_of_hearts/.local/share/fnm"
+FNM_PATH="$USER_HOME/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "$(fnm env --shell zsh)"
@@ -201,3 +201,16 @@ if [ -z "$VSCODE_PYTHON_AUTOACTIVATE_GUARD" ]; then
     fi
 fi
 # <<< vscode python
+
+CARGO_PATH="$USER_HOME/.cargo"
+if [ -d "$CARGO_PATH" ]; then 
+		. "$HOME/.cargo/env"
+		alias cg=cargo
+		alias cgi="cargo init --vsc none"
+		alias cgn="cargo new __vsc none"
+		alias cgb="cargo build"
+		alias cgbr="cargo build --release"
+		alias cgr="cargo run"
+		alias cgrr="cargo run --release"
+		alias cga="cargo add"
+fi
