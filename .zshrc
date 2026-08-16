@@ -207,7 +207,7 @@ if [ -d "$CARGO_PATH" ]; then
 		. "$HOME/.cargo/env"
 		alias cg=cargo
 		alias cgi="cargo init --vsc none"
-		alias cgn="cargo new __vsc none"
+		alias cgn="cargo new --vsc none"
 		alias cgb="cargo build"
 		alias cgbr="cargo build --release"
 		alias cgr="cargo run"
