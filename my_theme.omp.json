@@ -131,7 +131,7 @@
                 {
                     "type": "text",
                     "style": "plain",
-                    "template": "╰─",
+                    "template": "╰",
                     "foreground": "#fff4e1"
                 },
                 {
@@ -153,19 +153,13 @@
                         "ubuntu": "\uf31c",
                         "windows": "\ue70f"
                     },
-                    "template": "{{ .Icon }} ",
-                    "foreground": "#94d479",
+                    "template": " {{ .Icon }} {{ if .Root }}#{{else}}>{{end}}",
+                    "foreground": "#585858",
+                    "background": "#94d479",
+                    "leading_diamond": "\ue0b2",
+                    "trailing_diamond": "\ue0b0",
                     "type": "os",
-                    "style": "plain"
-                },
-                {
-                    "properties": {
-                        "cache_duration": "none"
-                    },
-                    "template": "{{ if .Root }}#{{else}}>{{end}}",
-                    "foreground": "#94d479",
-                    "type": "text",
-                    "style": "plain"
+                    "style": "diamond"
                 }
             ],
             "newline": true
