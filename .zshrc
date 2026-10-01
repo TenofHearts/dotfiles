@@ -162,7 +162,7 @@ if [[ -d "$UV_HOME" ]]; then
     function uvi() {
         local had_main_py=0
         [[ -f "main.py" ]] && had_main_py=1
-        uv init --no-readme --vsc none "$@"
+        uv init --no-readme --vcs none "$@"
         [[ $had_main_py -eq 0 && -f "main.py" ]] && rm main.py
     }
 
@@ -206,8 +206,8 @@ CARGO_PATH="$USER_HOME/.cargo"
 if [ -d "$CARGO_PATH" ]; then 
 		. "$HOME/.cargo/env"
 		alias cg=cargo
-		alias cgi="cargo init --vsc none"
-		alias cgn="cargo new --vsc none"
+		alias cgi="cargo init --vcs none"
+		alias cgn="cargo new --vcs none"
 		alias cgb="cargo build"
 		alias cgbr="cargo build --release"
 		alias cgr="cargo run"
