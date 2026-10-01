@@ -1,6 +1,1 @@
-#!/bin/zsh
-HOST_IP=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')
-export HTTP_PROXY="http://$HOST_IP:7897"
-export HTTPS_PROXY="http://$HOST_IP:7897"
-export ALL_PROXY="http://$HOST_IP:7897"
-echo "Proxy set to $HTTP_PROXY"
+scripts/set_proxy.sh
