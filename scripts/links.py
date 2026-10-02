@@ -14,6 +14,7 @@ FILES = {
     ".zshrc": "config/zsh/.zshrc",
     ".vimrc": "config/vim/.vimrc",
     ".tmux.conf": "config/tmux/.tmux.conf",
+    ".config/nvim": "config/nvim",
     ".config/oh-my-posh/theme.omp.json": "config/oh-my-posh/theme.omp.json",
     ".config/cowsay/stegosaurus_and_cat.cow": "config/cowsay/stegosaurus_and_cat.cow",
 }
