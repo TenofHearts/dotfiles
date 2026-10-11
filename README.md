@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and backs up existing files. Neovim is maintained in a separate Git submodule.
+Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and backs up existing files. Neovim and tmux are maintained in separate Git submodules. The tmux configuration can also be installed independently on Linux, macOS, and Windows through WSL.
 
 ## Quick start
 
@@ -40,7 +40,9 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 │   ├── bash/.bashrc
 │   ├── zsh/.zshrc
 │   ├── vim/.vimrc
-│   ├── tmux/.tmux.conf
+│   ├── tmux/                      # Git submodule: shared tmux configuration
+│   │   ├── .tmux.conf
+│   │   └── README.md              # Standalone setup and sync instructions
 │   ├── oh-my-posh/theme.omp.json
 │   ├── cowsay/stegosaurus_and_cat.cow
 │   └── nvim/                      # Git submodule: TenofHearts/nvim-config
@@ -51,7 +53,7 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 │           ├── custom/            # Language settings and extension loader
 │           └── kickstart/         # Health check and plugin modules/examples
 ├── tests/test_links.py            # Installer regression tests
-└── .gitmodules                    # Neovim submodule source
+└── .gitmodules                    # Neovim and tmux submodule sources
 ```
 
 The installer uses these fixed destinations under the selected home directory; it does not consult `XDG_CONFIG_HOME`:
@@ -144,6 +146,8 @@ Runs the installer tests in temporary home directories. Covers backups, repeated
 
 [`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) supports working across multiple terminal windows and panes within a persistent session. The guiding principle is to make navigation require fewer keystrokes and preserve working-directory context when creating new workspaces. The configuration stays small and focuses on interaction preferences, making it easy to understand and adapt without introducing a larger plugin framework.
 
+It is maintained in a separate Git submodule so you can share it without installing the rest of these dotfiles. See the [tmux README](config/tmux/README.md) for standalone installation and syncing between machines. Windows setup uses tmux inside WSL.
+
 ### Vim
 
 [`config/vim/.vimrc`](config/vim/.vimrc) provides a lightweight editing environment built around familiar Vim behavior. A small set of plugins improves common editing tasks while keeping the configuration straightforward. Its guiding principle is incremental enhancement: retain the core editor workflow and add conveniences where they help everyday use. Plugin installation is separate from the dotfiles installer.
@@ -164,7 +168,7 @@ Runs the installer tests in temporary home directories. Covers backups, repeated
 
 Edit files under `config/`; installed symlinks expose those edits directly. If you move the checkout, rerun installation to repair links. To add another managed configuration, add its destination/source pair to `FILES` in `scripts/links.py`.
 
-For Neovim changes, commit and push inside `config/nvim` first, then commit the updated submodule reference in this repository. See its README for plugin update instructions.
+For Neovim or tmux changes, commit and push inside `config/nvim` or `config/tmux` first, then commit the updated submodule reference in this repository. See their READMEs for plugin updates and standalone tmux syncing instructions.
 
 To bring an existing checkout to its committed submodule revision after pulling:
 
@@ -173,4 +177,4 @@ git pull
 git submodule update --init --recursive
 ```
 
-The parent repository pins a specific Neovim commit; updating to a different submodule revision is a deliberate change.
+The parent repository pins specific Neovim and tmux commits; updating to a different submodule revision is a deliberate change.
