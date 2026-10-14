@@ -144,7 +144,7 @@ Runs the installer tests in temporary home directories. Covers backups, repeated
 
 ### tmux
 
-[`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) supports working across multiple terminal windows and panes within a persistent session. The guiding principle is to make navigation require fewer keystrokes and preserve working-directory context when creating new workspaces. The configuration stays small and focuses on interaction preferences, making it easy to understand and adapt without introducing a larger plugin framework.
+[`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) provides persistent window, pane, and resize modes with Vim-style navigation, colored status badges, and Ctrl+h help in a scrollable popup. New windows and splits preserve the current directory. Alt navigation remains available to the desktop window manager, including GlazeWM. The configuration uses tmux's built-in key tables and pickers without a plugin framework; it requires tmux 3.2 or newer and `less`.
 
 It is maintained in a separate Git submodule so you can share it without installing the rest of these dotfiles. See the [tmux README](config/tmux/README.md) for standalone installation and syncing between machines. Windows setup uses tmux inside WSL.
 
