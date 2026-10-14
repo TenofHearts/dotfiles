@@ -3,4 +3,4 @@
 	url = https://github.com/TenofHearts/nvim-config.git
 [submodule "config/tmux"]
 	path = config/tmux
-	url = https://github.com/TenofHearts/tmux-config.git
+	url = git@github.com:TenofHearts/tmux-config.git
