@@ -144,7 +144,7 @@ Runs the installer tests in temporary home directories. Covers backups, repeated
 
 ### tmux
 
-Interactive Zsh terminals automatically attach to a persistent `main` session. This skips terminals already inside tmux and VS Code terminals; set `TMUX_AUTOSTART=0` to disable it.
+Interactive Zsh terminals automatically attach to a persistent `main` session before loading the rest of the shell configuration. After detaching or exiting tmux, the outer shell finishes loading normally. This skips terminals already inside tmux and VS Code terminals; set `TMUX_AUTOSTART=0` to disable it.
 
 [`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) provides persistent window, pane, and resize modes with Vim-style navigation, colored status badges, and Ctrl+h help in a scrollable popup. New windows and splits preserve the current directory. Alt navigation remains available to the desktop window manager, including GlazeWM. The configuration uses tmux's built-in key tables and pickers without a plugin framework; it requires tmux 3.2 or newer and `less`.
 

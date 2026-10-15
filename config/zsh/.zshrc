@@ -1,3 +1,11 @@
+# Start before expensive shell setup. Reuse the main session in interactive terminals. Set TMUX_AUTOSTART=0 to skip.
+if [[ -o interactive && -t 0 && -t 1 && -z "$TMUX" &&
+      "$TERM_PROGRAM" != vscode && "${TMUX_AUTOSTART:-1}" != 0 &&
+      -n "$TERM" && "$TERM" != dumb ]] && command -v tmux >/dev/null 2>&1; then
+    # Keep the outer shell: after detach/exit, finish loading this file.
+    tmux new-session -A -s main
+fi
+
 # User configuration and path setup
 # Get current user info for robust path handling
 USER_NAME="${USER:-$(whoami)}"
@@ -224,10 +232,3 @@ if [ -d "$CARGO_PATH" ]; then
 fi
 
 unset _dotfiles_root
-
-# Reuse the main session in interactive terminals. Set TMUX_AUTOSTART=0 to skip.
-if [[ -o interactive && -t 0 && -t 1 && -z "$TMUX" &&
-      "$TERM_PROGRAM" != vscode && "${TMUX_AUTOSTART:-1}" != 0 &&
-      -n "$TERM" && "$TERM" != dumb ]] && command -v tmux >/dev/null 2>&1; then
-    tmux new-session -A -s main
-fi
