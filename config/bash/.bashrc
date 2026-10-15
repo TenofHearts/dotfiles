@@ -8,6 +8,24 @@ case $- in
       *) return;;
 esac
 
+# Find Homebrew before initializing prompts and development tools.
+if ! command -v brew >/dev/null 2>&1; then
+    for _brew in /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+        if [ -x "$_brew" ]; then
+            eval "$("$_brew" shellenv)"
+            break
+        fi
+    done
+    unset _brew
+fi
+if command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+    for _tool_bin in "$HOMEBREW_PREFIX/opt/python/libexec/bin" "$HOMEBREW_PREFIX/opt/rustup/bin"; do
+        [ ! -d "$_tool_bin" ] || export PATH="$_tool_bin:$PATH"
+    done
+    unset _tool_bin
+fi
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -125,31 +143,31 @@ if ! shopt -oq posix; then
   fi
 fi
 
-export PATH=$PATH:/home/ten_of_hearts/miniconda3/bin/
+export PATH=$PATH:$HOME/miniconda3/bin/
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/ten_of_hearts/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+__conda_setup="$("$HOME/miniconda3/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/ten_of_hearts/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/ten_of_hearts/miniconda3/etc/profile.d/conda.sh"
+    if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "$HOME/miniconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/ten_of_hearts/miniconda3/bin:$PATH"
+        export PATH="$HOME/miniconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
 
 
-export NEMU_HOME=/home/ten_of_hearts/Programing/PA/ics2024/nemu
+export NEMU_HOME=$HOME/Programing/PA/ics2024/nemu
 
-export AM_HOME=/home/ten_of_hearts/Programing/PA/ics2024/abstract-machine
+export AM_HOME=$HOME/Programing/PA/ics2024/abstract-machine
 
 export PATH="/usr/lib/ccache:$PATH"
 
-# export OSH='/home/ten_of_hearts/.oh-my-bash'
+# export OSH="$HOME/.oh-my-bash"
 
 # OSH_THEME="powerbash10k"
 
@@ -170,12 +188,12 @@ export PATH="/usr/lib/ccache:$PATH"
 # OMB_PROMPT_SHOW_PYTHON_VENV=true
 # THEME_SHOW_PYTHON=true
 
-export NAVY_HOME=/home/ten_of_hearts/Programing/PA/ics2024/navy-apps
+export NAVY_HOME=$HOME/Programing/PA/ics2024/navy-apps
 
 alias cact='conda activate'
 alias cdac='conda deactivate'
 
-export PATH=$PATH:/home/ten_of_hearts/.local/bin
+export PATH=$PATH:$HOME/.local/bin
 
 _dotfiles_root="$(dirname "$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")")"
 _dotfiles_theme="$HOME/.config/oh-my-posh/theme.omp.json"
@@ -185,8 +203,10 @@ if command -v oh-my-posh >/dev/null && [ -r "$_dotfiles_theme" ]; then
 fi
 unset _dotfiles_root _dotfiles_theme
 export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init - bash)"
-. "$HOME/.cargo/env"
+if command -v rbenv >/dev/null 2>&1; then
+    eval "$(rbenv init - bash)"
+fi
+[ ! -r "$HOME/.cargo/env" ] || . "$HOME/.cargo/env"
 
 # >>> vscode python
 # version: 0.1.1
@@ -197,3 +217,14 @@ if [ -z "$VSCODE_PYTHON_AUTOACTIVATE_GUARD" ]; then
     fi
 fi
 # <<< vscode python
+
+# Prefer Homebrew's fnm, with the original standalone installation as fallback.
+if ! command -v fnm >/dev/null 2>&1 && [ -x "$HOME/.local/share/fnm/fnm" ]; then
+    export PATH="$HOME/.local/share/fnm:$PATH"
+fi
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --use-on-cd --shell bash)"
+fi
+if [ -r "${HOMEBREW_PREFIX:-/nonexistent}/etc/profile.d/autojump.sh" ]; then
+    . "$HOMEBREW_PREFIX/etc/profile.d/autojump.sh"
+fi

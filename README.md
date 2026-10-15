@@ -4,7 +4,20 @@ Personal shell, editor, terminal multiplexer, and prompt configuration for a Lin
 
 ## Quick start
 
-The installer requires Bash, Git, and Python 3 with no third-party Python packages. Install the applications you intend to use separately: this repository does not install system packages, change your login shell, or bootstrap shell plugins.
+For Ubuntu/Debian Linux (including WSL2), `bootstrap.sh` installs software from the editable `Brewfile`, configures stable Rust with editor components, and installs the configuration links. Run it as your normal user with sudo access and an internet connection:
+
+```sh
+git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
+cd dotfiles
+./bootstrap.sh --dry-run       # Preview without downloading or changing anything
+./bootstrap.sh                 # Install software and configuration links
+./bootstrap.sh --update        # Update all listed software and stable Rust
+./bootstrap.sh --update neovim # Install or update one app
+```
+
+Install Git with `sudo apt-get install git` first if needed to clone the repository. Full setup installs build prerequisites through apt; software-only updates do this when Homebrew is absent, then runs the [official Homebrew installer](https://brew.sh/). Homebrew manages development tools independently of your distribution's package versions. Open a new shell afterward to load its PATH.
+
+To install only configuration links, the existing installer requires Bash, Git, and Python 3 with no third-party Python packages:
 
 ```sh
 git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
@@ -20,10 +33,10 @@ If you already cloned without submodules, run `git submodule update --init --rec
 
 Before opening a new shell, adapt these settings to your machine:
 
-- Bash contains absolute `/home/ten_of_hearts/...` paths for Miniconda and the ICS coursework projects. Zsh derives those paths from `$HOME`, but retains the same project layout.
+- Both shells derive Miniconda and ICS coursework paths from `$HOME`, but retain the original project layout. Miniconda and coursework are not installed by the bootstrap.
 - Zsh exports lowercase proxy variables pointing to `http://127.0.0.1:7897`. Change or remove them if your proxy uses another address or you do not use one.
-- Both shells invoke `rbenv`; Bash sources `$HOME/.cargo/env`, and Zsh invokes `fnm` even outside its directory check. Install these tools or adjust those startup lines. Zsh's uv setup checks for `~/.local/bin`, rather than checking whether `uv` and `uvx` exist.
-- Optional Zsh integrations expect autojump under `~/.autojump` and autosuggestions/syntax-highlighting under `~/.zsh`. CUDA integration targets `/usr/local/cuda-12.9` when its compiler exists.
+- Existing rbenv, fnm, and Cargo environment files are loaded when available. Homebrew supplies Python, fnm, uv, and rustup; fnm manages Node.js; existing language managers or activated environments can take precedence over these tools.
+- Optional Zsh integrations load autosuggestions/syntax-highlighting from `~/.zsh` or Homebrew. Autojump loads from `~/.autojump` or Homebrew. CUDA integration targets `/usr/local/cuda-12.9` when its compiler exists; CUDA is not installed by the bootstrap.
 - Select a Nerd Font in your terminal for prompt/editor icons. Neovim can disable icons with `vim.g.have_nerd_font = false` in `config/nvim/init.lua`.
 
 Open a new Bash or Zsh session to load its configuration. For Vim, install vim-plug separately and run `:PlugInstall`. For Neovim dependencies and first-run setup, see the [Neovim README](config/nvim/README.md).
@@ -33,6 +46,8 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 ```text
 .
 ├── install.sh                     # Installation entry point
+├── bootstrap.sh                   # Ubuntu/Debian software setup and updates
+├── Brewfile                       # Editable software list
 ├── scripts/
 │   ├── links.py                   # Install, inspect, and restore symlinks
 │   └── set_proxy.sh               # Export host-derived proxy settings
@@ -69,6 +84,24 @@ The installer uses these fixed destinations under the selected home directory; i
 | `config/cowsay/stegosaurus_and_cat.cow` | `~/.config/cowsay/stegosaurus_and_cat.cow` |
 
 ## Script usage
+
+### `bootstrap.sh` and `Brewfile`
+
+```sh
+./bootstrap.sh                         # Software, Rust components, and dotfile links
+./bootstrap.sh --software-only         # Software and Rust components only
+./bootstrap.sh --update                # Upgrade everything in Brewfile and stable Rust
+./bootstrap.sh --update neovim uv       # Install/upgrade selected Homebrew formulae only
+./bootstrap.sh --dry-run --update       # Preview updates
+```
+
+Edit `Brewfile` to choose what belongs on every machine. It includes shells/plugins, Vim/Neovim, tmux, search tools, Oh My Posh, Python, uv, fnm, Rust tooling, and build helpers. Add a line such as `brew "jq"` to keep another tool in your standard setup. A named update can install a formula outside this list, but does not add it to the file.
+
+The initial list was chosen from the existing Ubuntu workstation: fnm, uv, rustup, autojump, Zsh plugins, tmux, Vim/Neovim, Oh My Posh, CMake, ccache, htop, rsync, wget, and the shell's fortune/cowsay/lolcat greeting. Ripgrep and fd provide the editor's search dependencies independently of tools bundled with other applications. Ruby/rbenv, MySQL, QEMU, RISC-V/multilib compilers, and opam were left optional because they serve particular projects. Docker is currently supplied by Windows Docker Desktop through WSL, so the bootstrap does not install a competing Linux daemon.
+
+The [Homebrew Bundle command](https://docs.brew.sh/Brew-Bundle-and-Brewfile) installs missing packages and upgrades listed packages. “Latest” means the stable version currently packaged by Homebrew; unversioned entries can cross major versions. Full setup/update installs the latest Node LTS through fnm, preserving an existing default. `./bootstrap.sh --update node` installs the latest Node release through fnm; use `fnm use <version>` and `fnm default <version>` to switch when ready. The first fnm installation supplies a default on a new machine. Global npm packages are not copied between Node versions. Rust uses the latest stable toolchain with `rust-analyzer`, `rust-src`, `rustfmt`, and `clippy`. An existing default Rust toolchain is preserved. Removing an entry does not uninstall software. The bootstrap stops on a failed command; rerun it after fixing the cause. Software installation is not rolled back by the link installer's restore command.
+
+This does not change your login shell. Ruby/rbenv, MySQL, QEMU, RISC-V/multilib compilers, Miniconda, CUDA/GPU drivers, GUI applications, Nerd Fonts, and Vim plugins remain separate installations. The Neovim configuration currently requires Neovim 0.12+; check `nvim --version` against its README if Homebrew's stable package has not reached that requirement.
 
 ### `install.sh`
 

@@ -3,6 +3,24 @@ if [[ -r "$HOME/.zprofile.local" ]]; then
     source "$HOME/.zprofile.local"
 fi
 
+# Find Homebrew before initializing prompts and development tools.
+if ! command -v brew >/dev/null 2>&1; then
+    for _brew in /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+        if [ -x "$_brew" ]; then
+            eval "$("$_brew" shellenv)"
+            break
+        fi
+    done
+    unset _brew
+fi
+if command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+    for _tool_bin in "$HOMEBREW_PREFIX/opt/python/libexec/bin" "$HOMEBREW_PREFIX/opt/rustup/bin"; do
+        [ ! -d "$_tool_bin" ] || export PATH="$_tool_bin:$PATH"
+    done
+    unset _tool_bin
+fi
+
 # Start before expensive shell setup. Reuse the main session in interactive terminals. Set TMUX_AUTOSTART=0 to skip.
 if [[ -o interactive && -t 0 && -t 1 && -z "$TMUX" &&
       "$TERM_PROGRAM" != vscode && "${TMUX_AUTOSTART:-1}" != 0 &&
@@ -119,11 +137,14 @@ unset __conda_setup
 
 # Load autojump if available
 AUTOJUMP_SCRIPT="$USER_HOME/.autojump/etc/profile.d/autojump.sh"
+[[ -s "$AUTOJUMP_SCRIPT" ]] || AUTOJUMP_SCRIPT="${HOMEBREW_PREFIX:-/nonexistent}/etc/profile.d/autojump.sh"
 [[ -s "$AUTOJUMP_SCRIPT" ]] && source "$AUTOJUMP_SCRIPT"
 
 export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init - zsh)"
-FPATH="$(rbenv root)/completions":"$FPATH"
+if command -v rbenv >/dev/null 2>&1; then
+    eval "$(rbenv init - zsh)"
+    FPATH="$(rbenv root)/completions":"$FPATH"
+fi
 
 autoload -U compinit && compinit -u
 
@@ -131,15 +152,22 @@ autoload -U compinit && compinit -u
 ZSH_AUTOSUGGESTIONS="$USER_HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
 ZSH_HIGHLIGHTING="$USER_HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
+if [[ -n "$HOMEBREW_PREFIX" ]]; then
+    [[ -f "$ZSH_AUTOSUGGESTIONS" ]] || ZSH_AUTOSUGGESTIONS="$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    [[ -f "$ZSH_HIGHLIGHTING" ]] || ZSH_HIGHLIGHTING="$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
 [[ -f "$ZSH_AUTOSUGGESTIONS" ]] && source "$ZSH_AUTOSUGGESTIONS"
 [[ -f "$ZSH_HIGHLIGHTING" ]] && source "$ZSH_HIGHLIGHTING"
 
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=114'
-ZSH_HIGHLIGHT_STYLES[command]='fg=114'
-ZSH_HIGHLIGHT_STYLES[path]='fg=182'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=114'
-ZSH_HIGHLIGHT_STYLES[function]='fg=067'
-ZSH_HIGHLIGHT_STYLES[precommand]='fg=035, bold'
+if (( ${+ZSH_HIGHLIGHT_STYLES} )); then
+    ZSH_HIGHLIGHT_STYLES[builtin]='fg=114'
+    ZSH_HIGHLIGHT_STYLES[command]='fg=114'
+    ZSH_HIGHLIGHT_STYLES[path]='fg=182'
+    ZSH_HIGHLIGHT_STYLES[alias]='fg=114'
+    ZSH_HIGHLIGHT_STYLES[function]='fg=067'
+    ZSH_HIGHLIGHT_STYLES[precommand]='fg=035, bold'
+fi
 
 # setopt autocd
 # setopt correct
@@ -169,8 +197,7 @@ if [ -x /usr/local/cuda-12.9/bin/nvcc ] && [[ ":$PATH:" != *":/usr/local/cuda-12
 fi
 
 UV_HOME="$USER_HOME/.local/bin"
-if [[ -d "$UV_HOME" ]]; then
-    export PATH="$UV_HOME:$PATH"
+if command -v uv >/dev/null 2>&1 && command -v uvx >/dev/null 2>&1; then
     eval "$(uv generate-shell-completion zsh)"
     eval "$(uvx --generate-shell-completion zsh)"
     function uvac() {
@@ -207,11 +234,12 @@ export all_proxy=http://127.0.0.1:7897
 
 # fnm
 FNM_PATH="$USER_HOME/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
+if ! command -v fnm >/dev/null 2>&1 && [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
-  eval "$(fnm env --shell zsh)"
 fi
-eval "$(fnm env --use-on-cd --shell zsh)"
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --use-on-cd --shell zsh)"
+fi
 
 # >>> vscode python
 # version: 0.1.1
@@ -224,8 +252,8 @@ fi
 # <<< vscode python
 
 CARGO_PATH="$USER_HOME/.cargo"
-if [ -d "$CARGO_PATH" ]; then 
-		. "$HOME/.cargo/env"
+[ ! -r "$CARGO_PATH/env" ] || . "$CARGO_PATH/env"
+if command -v cargo >/dev/null 2>&1; then
 		alias cg=cargo
 		alias cgi="cargo init --vcs none"
 		alias cgn="cargo new --vcs none"
