@@ -1,3 +1,8 @@
+# Load machine-specific settings before tmux, including in non-login shells.
+if [[ -r "$HOME/.zprofile.local" ]]; then
+    source "$HOME/.zprofile.local"
+fi
+
 # Start before expensive shell setup. Reuse the main session in interactive terminals. Set TMUX_AUTOSTART=0 to skip.
 if [[ -o interactive && -t 0 && -t 1 && -z "$TMUX" &&
       "$TERM_PROGRAM" != vscode && "${TMUX_AUTOSTART:-1}" != 0 &&
