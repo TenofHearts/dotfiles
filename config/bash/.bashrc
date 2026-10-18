@@ -225,6 +225,7 @@ fi
 if command -v fnm >/dev/null 2>&1; then
     eval "$(fnm env --use-on-cd --shell bash)"
 fi
-if [ -r "${HOMEBREW_PREFIX:-/nonexistent}/etc/profile.d/autojump.sh" ]; then
-    . "$HOMEBREW_PREFIX/etc/profile.d/autojump.sh"
+# Load zoxide with j as the jump command.
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init bash --cmd j)"
 fi

@@ -135,10 +135,10 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-# Load autojump if available
-AUTOJUMP_SCRIPT="$USER_HOME/.autojump/etc/profile.d/autojump.sh"
-[[ -s "$AUTOJUMP_SCRIPT" ]] || AUTOJUMP_SCRIPT="${HOMEBREW_PREFIX:-/nonexistent}/etc/profile.d/autojump.sh"
-[[ -s "$AUTOJUMP_SCRIPT" ]] && source "$AUTOJUMP_SCRIPT"
+# Load zoxide with j as the jump command.
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh --cmd j)"
+fi
 
 export PATH="$HOME/.rbenv/bin:$PATH"
 if command -v rbenv >/dev/null 2>&1; then
