@@ -38,6 +38,39 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, True)
         self.assertEqual(list(self.home.iterdir()), [])
 
+    def test_only_codex_installs_and_restores_without_other_configs(self):
+        original = self.home / ".bashrc"
+        original.write_text("keep local shell\n")
+        links.install(self.home, True, "codex")
+        self.assertEqual(list(self.home.iterdir()), [original])
+        links.install(self.home, False, "codex")
+        self.assertEqual(links.status(self.home, "codex"), 0)
+        self.assertEqual(original.read_text(), "keep local shell\n")
+        self.assertFalse((self.home / ".zshrc").exists())
+        links.install(self.home, False, "codex")
+        manifests = list(self.home.glob(".local/state/dotfiles/backups/*/manifest.json"))
+        self.assertEqual(len(manifests), 1)
+        links.restore(manifests[0], False)
+        self.assertFalse((self.home / ".codex/dotfiles.config.toml").exists())
+        self.assertEqual(original.read_text(), "keep local shell\n")
+
+    def test_codex_profile_preserves_machine_config_and_state(self):
+        codex_home = self.home / ".codex"
+        codex_home.mkdir()
+        local = codex_home / "config.toml"
+        local.write_text('[projects."/machine/project"]\ntrust_level = "trusted"\n')
+        auth = codex_home / "auth.json"
+        auth.write_text("local credentials placeholder\n")
+        links.install(self.home, False)
+        profile = codex_home / "dotfiles.config.toml"
+        self.assertTrue(profile.is_symlink())
+        self.assertFalse(local.is_symlink())
+        manifest = next(self.home.glob(".local/state/dotfiles/backups/*/manifest.json"))
+        links.restore(manifest, False)
+        self.assertFalse(profile.exists())
+        self.assertEqual(local.read_text(), '[projects."/machine/project"]\ntrust_level = "trusted"\n')
+        self.assertEqual(auth.read_text(), "local credentials placeholder\n")
+
     def test_restore_protects_replaced_files(self):
         links.install(self.home, False)
         changed = self.home / ".zshrc"

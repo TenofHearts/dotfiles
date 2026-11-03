@@ -55,6 +55,7 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 │   ├── bash/.bashrc
 │   ├── zsh/.zshrc
 │   ├── vim/.vimrc
+│   ├── codex/dotfiles.config.toml # Shared Codex CLI preferences
 │   ├── tmux/                      # Git submodule: shared tmux configuration
 │   │   ├── .tmux.conf
 │   │   └── README.md              # Standalone setup and sync instructions
@@ -79,6 +80,7 @@ The installer uses these fixed destinations under the selected home directory; i
 | `config/zsh/.zshrc` | `~/.zshrc` |
 | `config/vim/.vimrc` | `~/.vimrc` |
 | `config/tmux/.tmux.conf` | `~/.tmux.conf` |
+| `config/codex/dotfiles.config.toml` | `~/.codex/dotfiles.config.toml` |
 | `config/nvim/` | `~/.config/nvim` |
 | `config/oh-my-posh/theme.omp.json` | `~/.config/oh-my-posh/theme.omp.json` |
 | `config/cowsay/stegosaurus_and_cat.cow` | `~/.config/cowsay/stegosaurus_and_cat.cow` |
@@ -108,16 +110,17 @@ This does not change your login shell. Ruby/rbenv, MySQL, QEMU, RISC-V/multilib 
 ```sh
 ./install.sh                    # Initialize submodules and install links
 ./install.sh --dry-run          # Preview link changes without writing files
+./install.sh --only codex       # Install only the shared Codex profile
 ./install.sh --home /tmp/demo-home  # Install into an alternate home
 ```
 
-Resolves the repository from its own location, updates submodules on real installs, and delegates to `links.py install`. Arguments are forwarded to Python. Keep the checkout in place: the installed files are relative symlinks into it.
+Resolves the repository from its own location, updates required submodules on real installs, and delegates to `links.py install`. Use `--only APP` to select one application's configuration; for Codex, launch with `codex --profile dotfiles` afterward. Arguments are forwarded to Python. Keep the checkout in place: the installed files are relative symlinks into it.
 
 ### `scripts/links.py`
 
 ```sh
-python3 scripts/links.py install [--home PATH] [--dry-run]
-python3 scripts/links.py status [--home PATH]
+python3 scripts/links.py install [--only APP] [--home PATH] [--dry-run]
+python3 scripts/links.py status [--only APP] [--home PATH]
 python3 scripts/links.py restore /path/to/manifest.json [--dry-run]
 python3 scripts/links.py --help
 ```
@@ -188,6 +191,10 @@ export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1
 `.zshrc` sources this file before the tmux check, including in non-login shells. Keep it limited to environment settings, since it also runs for shells inside tmux. Without a setting, tmux autostart defaults to enabled.
 
 [`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) provides persistent window, pane, and resize modes with Vim-style navigation, colored status badges, and Ctrl+h help in a scrollable popup. New windows and splits preserve the current directory. Alt navigation remains available to the desktop window manager, including GlazeWM. The configuration uses tmux's built-in key tables and pickers without a plugin framework; it requires tmux 3.2 or newer and `less`.
+
+### Codex
+
+[`config/codex/dotfiles.config.toml`](config/codex/dotfiles.config.toml) provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. Bash and Zsh load the profile through the `codex` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
 
 ### Vim
 

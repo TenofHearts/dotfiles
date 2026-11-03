@@ -14,6 +14,7 @@ FILES = {
     ".zshrc": "config/zsh/.zshrc",
     ".vimrc": "config/vim/.vimrc",
     ".tmux.conf": "config/tmux/.tmux.conf",
+    ".codex/dotfiles.config.toml": "config/codex/dotfiles.config.toml",
     ".config/nvim": "config/nvim",
     ".config/oh-my-posh/theme.omp.json": "config/oh-my-posh/theme.omp.json",
     ".config/cowsay/stegosaurus_and_cat.cow": "config/cowsay/stegosaurus_and_cat.cow",
@@ -36,8 +37,13 @@ def check_parents(dest, home):
             raise RuntimeError(f"Symlinked parent needs manual review: {parent}")
 
 
-def install(home, dry_run):
-    pending = [(home / name, ROOT / src) for name, src in FILES.items()
+def selected_files(only=None):
+    return {name: src for name, src in FILES.items()
+            if only is None or src.split("/")[1] == only}
+
+
+def install(home, dry_run, only=None):
+    pending = [(home / name, ROOT / src) for name, src in selected_files(only).items()
                if not linked(home / name, ROOT / src)]
     # Never follow a parent directory link into an unrelated checkout.
     for dest, source in pending:
@@ -99,9 +105,9 @@ def restore(manifest, dry_run):
             shutil.move(record["backup"], str(dest))
 
 
-def status(home):
+def status(home, only=None):
     bad = False
-    for name, source in FILES.items():
+    for name, source in selected_files(only).items():
         ok = linked(home / name, ROOT / source)
         print(f"{'OK' if ok else 'MISSING/CHANGED'} {home / name}")
         bad |= not ok
@@ -114,12 +120,16 @@ def main():
     parser.add_argument("manifest", nargs="?", type=Path)
     parser.add_argument("--home", type=Path, default=Path.home(), help="Alternate home for testing")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--only", choices=sorted({src.split("/")[1] for src in FILES.values()}),
+                        help="Install or inspect only this application's configuration")
     args = parser.parse_args()
+    if args.only and args.action == "restore":
+        parser.error("--only applies to install and status; restore uses its backup manifest")
     home = args.home.absolute()
     if args.action == "install":
-        install(home, args.dry_run)
+        install(home, args.dry_run, args.only)
     elif args.action == "status":
-        return status(home)
+        return status(home, args.only)
     else:
         if not args.manifest:
             parser.error("restore requires a backup manifest")

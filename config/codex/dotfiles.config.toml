@@ -1,0 +1,18 @@
+# Shared CLI preferences. Machine settings stay in ~/.codex/config.toml.
+# Loaded with: codex --profile dotfiles (the shell alias supplies this).
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+sandbox_mode = "workspace-write"
+
+[tui]
+vim_mode_default = true
+# Ordered status-line items shared across machines.
+status_line = [
+    "model-with-reasoning",
+    "current-dir",
+    "git-branch",
+    "context-remaining",
+    "five-hour-limit",
+    "weekly-limit",
+]
+screen_reader_detection_done = true
