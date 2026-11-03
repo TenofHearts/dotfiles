@@ -17,7 +17,7 @@ done
 if [[ " $* " != *" --dry-run "* ]]; then
     case "$only" in
         "") git -C "$ROOT" submodule update --init --recursive ;;
-        nvim|tmux) git -C "$ROOT" submodule update --init --recursive -- "config/$only" ;;
+        codex|nvim|tmux) git -C "$ROOT" submodule update --init --recursive -- "config/$only" ;;
     esac
 fi
 exec python3 "$ROOT/scripts/links.py" install "$@"

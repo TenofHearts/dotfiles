@@ -1,7 +1,9 @@
 import contextlib
 import importlib.util
 import io
+import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -53,6 +55,25 @@ class LinkTests(unittest.TestCase):
         links.restore(manifests[0], False)
         self.assertFalse((self.home / ".codex/dotfiles.config.toml").exists())
         self.assertEqual(original.read_text(), "keep local shell\n")
+
+    def test_codex_only_installer_initializes_its_submodule(self):
+        bin_dir = self.home / "bin"
+        bin_dir.mkdir()
+        log = self.home / "git-args"
+        fake_git = bin_dir / "git"
+        fake_git.write_text('#!/bin/sh\nprintf \'%s\\n\' "$@" > "$DOTFILES_TEST_GIT_LOG"\n')
+        fake_git.chmod(0o755)
+        env = {**os.environ, "PATH": str(bin_dir) + os.pathsep + os.environ["PATH"],
+               "DOTFILES_TEST_GIT_LOG": str(log)}
+        for option in (["--only", "codex"], ["--only=codex"]):
+            with self.subTest(option=option):
+                subprocess.run(["bash", str(links.ROOT / "install.sh"), *option,
+                                "--home", str(self.home)], env=env, check=True, capture_output=True)
+                self.assertEqual(log.read_text().splitlines(),
+                                 ["-C", str(links.ROOT), "submodule", "update", "--init",
+                                  "--recursive", "--", "config/codex"])
+        self.assertTrue((self.home / ".codex/dotfiles.config.toml").is_symlink())
+        self.assertFalse((self.home / ".bashrc").exists())
 
     def test_codex_profile_preserves_machine_config_and_state(self):
         codex_home = self.home / ".codex"

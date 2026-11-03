@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and backs up existing files. Neovim and tmux are maintained in separate Git submodules. The tmux configuration can also be installed independently on Linux, macOS, and Windows through WSL.
+Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and backs up existing files. Codex, Neovim, and tmux are maintained in separate Git submodules. The tmux configuration can also be installed independently on Linux, macOS, and Windows through WSL.
 
 ## Quick start
 
@@ -55,7 +55,9 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 │   ├── bash/.bashrc
 │   ├── zsh/.zshrc
 │   ├── vim/.vimrc
-│   ├── codex/dotfiles.config.toml # Shared Codex CLI preferences
+│   ├── codex/                     # Git submodule: shared Codex CLI preferences
+│   │   ├── dotfiles.config.toml
+│   │   └── README.md
 │   ├── tmux/                      # Git submodule: shared tmux configuration
 │   │   ├── .tmux.conf
 │   │   └── README.md              # Standalone setup and sync instructions
@@ -194,7 +196,7 @@ export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1
 
 ### Codex
 
-[`config/codex/dotfiles.config.toml`](config/codex/dotfiles.config.toml) provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. Bash and Zsh load the profile through the `codex` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
+[`config/codex/`](config/codex/) provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. It is maintained in a separate Git submodule. Bash and Zsh load the profile through the `codex` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
 
 ### Vim
 
@@ -216,7 +218,7 @@ export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1
 
 Edit files under `config/`; installed symlinks expose those edits directly. If you move the checkout, rerun installation to repair links. To add another managed configuration, add its destination/source pair to `FILES` in `scripts/links.py`.
 
-For Neovim or tmux changes, commit and push inside `config/nvim` or `config/tmux` first, then commit the updated submodule reference in this repository. See their READMEs for plugin updates and standalone tmux syncing instructions.
+For Codex, Neovim, or tmux changes, commit and push inside `config/codex`, `config/nvim`, or `config/tmux` first, then commit the updated submodule reference in this repository. See their READMEs for setup and syncing instructions.
 
 To bring an existing checkout to its committed submodule revision after pulling:
 
@@ -225,4 +227,4 @@ git pull
 git submodule update --init --recursive
 ```
 
-The parent repository pins specific Neovim and tmux commits; updating to a different submodule revision is a deliberate change.
+The parent repository pins specific Codex, Neovim, and tmux commits; updating to a different submodule revision is a deliberate change.

@@ -4,3 +4,6 @@
 [submodule "config/tmux"]
 	path = config/tmux
 	url = git@github.com:TenofHearts/tmux-config.git
+[submodule "config/codex"]
+	path = config/codex
+	url = git@github.com:TenofHearts/codex-config.git
