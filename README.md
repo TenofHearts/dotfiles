@@ -127,24 +127,24 @@ python3 scripts/links.py restore /path/to/manifest.json [--dry-run]
 python3 scripts/links.py --help
 ```
 
-- **Install:** checks source availability and destination parents, leaves correct links alone, and moves conflicting files, directories, or dangling symlinks into a timestamped backup. Writes a manifest and creates relative symlinks. Repeating an unchanged installation creates no new backup. If installation fails partway through, it attempts to undo changes already made.
+- **Install:** checks source availability and destination parents, leaves correct links alone, and replaces conflicting files, directories, or symlinks with relative symlinks. Conflicting contents are permanently removed; no backups or manifests are created. Installation rejects symlinked destination parents such as `~/.config`. A failed installation may leave partial changes.
 - **Status:** reports `OK` or `MISSING/CHANGED` for each destination. Exits with code 0 when every link matches, or 1 otherwise. It checks link targets, not configuration contents or application dependencies.
-- **Restore:** reads the manifest, validates all entries before changing files, removes installer links, and restores saved originals. Destinations with no original backup are simply unlinked. It refuses to overwrite a destination that has been replaced with another file or link, and refuses missing backups. The manifest contains absolute paths; `--home` does not relocate a restore.
+- **Restore (existing backups only):** reads a manifest from an older installation, validates all entries before changing files, removes installer links, and restores saved originals. Destinations with no original backup are simply unlinked. It refuses to overwrite a destination that has been replaced with another file or link, and refuses missing backups. The manifest contains absolute paths; `--home` does not relocate a restore.
 
-Backup manifests are printed after installation and stored under:
+Older installations stored backup manifests under:
 
 ```text
 ~/.local/state/dotfiles/backups/<timestamp>/manifest.json
 ```
 
-To undo an installation, use its exact manifest:
+To restore a backup created by an older installation, use its exact manifest:
 
 ```sh
 python3 scripts/links.py restore "$HOME/.local/state/dotfiles/backups/<timestamp>/manifest.json" --dry-run
 python3 scripts/links.py restore "$HOME/.local/state/dotfiles/backups/<timestamp>/manifest.json"
 ```
 
-Replace `<timestamp>` with the actual backup directory. Restore moves backed-up originals back into place, so that backup is consumed. Only entries changed by that installation are included. Installation rejects symlinked destination parents such as `~/.config`, and symlinked backup parents, to avoid writing through them into another location.
+Replace `<timestamp>` with the actual backup directory. Restore moves backed-up originals back into place, so that backup is consumed. Only entries changed by that installation are included. New installations cannot be undone using this command because they do not create backups.
 
 ### `scripts/set_proxy.sh`
 
@@ -168,7 +168,7 @@ unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
 python3 -m unittest discover -s tests -v
 ```
 
-Runs the installer tests in temporary home directories. Covers backups, repeated installation, restoration, dry runs, changed-file protection, dangling and legacy links, and rejection of symlinked destination/backup parents.
+Runs the installer tests in temporary home directories. Covers replacement without backups, repeated installation, restoration of older manifests, dry runs, changed-file protection, dangling and legacy links, and rejection of symlinked destination parents.
 
 ## Application configurations
 

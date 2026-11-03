@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Backed-up, idempotent links; no third-party Python dependencies."""
+"""Idempotent configuration links; no third-party Python dependencies."""
 import argparse
-from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -54,35 +53,18 @@ def install(home, dry_run, only=None):
         print("All configuration links are already installed.")
         return
     for dest, source in pending:
-        print(f"{'Back up and link' if exists(dest) else 'Link'} {dest} -> {source}")
+        print(f"{'Replace and link' if exists(dest) else 'Link'} {dest} -> {source}")
     if dry_run:
         return
-    backup = home / ".local/state/dotfiles/backups" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-    check_parents(backup, home)
-    backup.mkdir(parents=True, mode=0o700)
-    manifest = backup / "manifest.json"
-    records = []
-    try:
-        for dest, source in pending:
-            saved = backup / dest.relative_to(home)
-            record = {"dest": str(dest), "source": str(source),
-                      "backup": str(saved) if exists(dest) else None}
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            if exists(dest):
-                saved.parent.mkdir(parents=True, exist_ok=True)
-                shutil.move(str(dest), str(saved))
-            records.append(record)
-            manifest.write_text(json.dumps(records, indent=2) + "\n")
-            dest.symlink_to(os.path.relpath(source, dest.parent.resolve()), target_is_directory=source.is_dir())
-    except Exception:
-        for record in reversed(records):
-            dest = Path(record["dest"])
-            if linked(dest, Path(record["source"])):
-                dest.unlink()
-            if record["backup"] and exists(Path(record["backup"])) and not exists(dest):
-                shutil.move(record["backup"], str(dest))
-        raise
-    print(f"Backup manifest: {manifest}")
+    for dest, source in pending:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.is_symlink():
+            dest.unlink()
+        elif dest.is_dir():
+            shutil.rmtree(dest)
+        elif exists(dest):
+            dest.unlink()
+        dest.symlink_to(os.path.relpath(source, dest.parent.resolve()), target_is_directory=source.is_dir())
 
 
 def restore(manifest, dry_run):
