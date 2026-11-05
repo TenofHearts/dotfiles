@@ -5,16 +5,20 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 dry_run=0
 links=1
 update=0
+force=0
+skip_prerequisites=0
 formulae=()
 
 usage() {
     cat <<'EOF'
-Usage: ./bootstrap.sh [--dry-run] [--software-only]
+Usage: ./bootstrap.sh [--dry-run] [--software-only] [--force] [--skip-prerequisites]
        ./bootstrap.sh [--dry-run] --update [FORMULA ...]
 
 Default: install Homebrew if needed, install/upgrade Brewfile software,
 install Node LTS through fnm and stable Rust with editor components, and install dotfile links.
 --software-only  Skip dotfile links.
+--force          Delete conflicting configurations when installing links (no backups).
+--skip-prerequisites  Manage system prerequisites yourself.
 --update         Update software only; optional formula names select individual apps.
 --dry-run        Print commands without downloads, installs, or filesystem changes.
 
@@ -29,6 +33,8 @@ EOF
 while (($#)); do
     case "$1" in
         --dry-run) dry_run=1 ;;
+        --force) force=1 ;;
+        --skip-prerequisites) skip_prerequisites=1 ;;
         --software-only) links=0 ;;
         --update) update=1; links=0 ;;
         -h|--help) usage; exit 0 ;;
@@ -53,8 +59,8 @@ run() {
     if (( ! dry_run )); then "$@"; fi
 }
 
-if [[ "$(uname -s)" != Linux ]] || ! command -v apt-get >/dev/null 2>&1; then
-    echo "This bootstrap supports Ubuntu/Debian Linux (including WSL2)." >&2
+if [[ "$(uname -s)" != Linux ]]; then
+    echo "This bootstrap supports Linux (including WSL2)." >&2
     exit 1
 fi
 if (( EUID == 0 && ! dry_run )); then
@@ -69,9 +75,10 @@ if [[ -z "$brew_bin" ]]; then
         if [[ -x "$candidate" ]]; then brew_bin="$candidate"; break; fi
     done
 fi
-if [[ -z "$brew_bin" ]] || (( links )); then
-    run sudo apt-get update
-    run sudo apt-get install -y build-essential procps curl file git ca-certificates
+# Distro-specific commands are confined to this optional prerequisite adapter.
+if [[ -z "$brew_bin" ]] && (( ! skip_prerequisites )); then
+    source "$ROOT/scripts/prerequisites.sh"
+    install_prerequisites
 fi
 if [[ -z "$brew_bin" ]]; then
     if (( dry_run )); then
@@ -137,6 +144,10 @@ else
     elif ! "$rustup_bin" default >/dev/null 2>&1; then
         run "$rustup_bin" default stable
     fi
-    if (( links )); then run "$ROOT/install.sh"; fi
+    if (( links )); then
+        link_args=()
+        (( ! force )) || link_args+=(--force)
+        run "$ROOT/install.sh" "${link_args[@]}"
+    fi
 fi
 echo 'Done. Open a new shell to load the installed tools.'

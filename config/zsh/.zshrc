@@ -56,15 +56,14 @@ SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
 # Use modern completion system
-autoload -Uz compinit
-compinit
-
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' menu select=2
-eval "$(dircolors -b)"
+if command -v dircolors >/dev/null 2>&1; then
+    eval "$(dircolors -b)"
+fi
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' list-colors ''
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
@@ -100,12 +99,6 @@ if [[ -d "$MINICONDA_PATH" ]]; then
     export PATH=$PATH:$MINICONDA_PATH
 fi
 
-export NEMU_HOME="$USER_HOME/Programing/PA/ics2024/nemu"
-export AM_HOME="$USER_HOME/Programing/PA/ics2024/abstract-machine"
-export PATH="/usr/lib/ccache:$PATH"
-
-export NAVY_HOME="$USER_HOME/Programing/PA/ics2024/navy-apps"
-
 alias cact='conda activate'
 alias cdac='conda deactivate'
 
@@ -125,17 +118,19 @@ unset _dotfiles_theme
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$( "$USER_HOME/miniconda3/bin/conda" shell.zsh hook 2> /dev/null )"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "$USER_HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "$USER_HOME/miniconda3/etc/profile.d/conda.sh"
+if [ -x "$HOME/miniconda3/bin/conda" ]; then
+    __conda_setup="$( "$USER_HOME/miniconda3/bin/conda" shell.zsh hook 2> /dev/null )"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
     else
-        export PATH="$USER_HOME/miniconda3/bin:$PATH"
+        if [ -f "$USER_HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+            . "$USER_HOME/miniconda3/etc/profile.d/conda.sh"
+        else
+            export PATH="$USER_HOME/miniconda3/bin:$PATH"
+        fi
     fi
+    unset __conda_setup
 fi
-unset __conda_setup
 # <<< conda initialize <<<
 
 # Load zoxide with j as the jump command.
@@ -149,7 +144,9 @@ if command -v rbenv >/dev/null 2>&1; then
     FPATH="$(rbenv root)/completions":"$FPATH"
 fi
 
-autoload -U compinit && compinit -u
+# Initialize completion once, after language managers have added their paths.
+autoload -Uz compinit
+compinit
 
 # Load zsh plugins if available
 ZSH_AUTOSUGGESTIONS="$USER_HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -159,6 +156,15 @@ if [[ -n "$HOMEBREW_PREFIX" ]]; then
     [[ -f "$ZSH_AUTOSUGGESTIONS" ]] || ZSH_AUTOSUGGESTIONS="$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
     [[ -f "$ZSH_HIGHLIGHTING" ]] || ZSH_HIGHLIGHTING="$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
+
+# Also recognize distro-packaged plugins without depending on a package manager.
+for _plugin in /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh; do
+    [[ -f "$ZSH_AUTOSUGGESTIONS" ]] || ZSH_AUTOSUGGESTIONS="$_plugin"
+done
+for _plugin in /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh; do
+    [[ -f "$ZSH_HIGHLIGHTING" ]] || ZSH_HIGHLIGHTING="$_plugin"
+done
+unset _plugin
 
 [[ -f "$ZSH_AUTOSUGGESTIONS" ]] && source "$ZSH_AUTOSUGGESTIONS"
 [[ -f "$ZSH_HIGHLIGHTING" ]] && source "$ZSH_HIGHLIGHTING"
@@ -192,13 +198,6 @@ if command -v fortune > /dev/null && command -v cowsay > /dev/null; then
 		fi
 fi
 
-if [ -x /usr/local/cuda-12.9/bin/nvcc ] && [[ ":$PATH:" != *":/usr/local/cuda-12.9/bin:"* ]]; then
-    # echo "✅ CUDA env not yet set, now exporting..."
-    export PATH=/usr/local/cuda-12.9/bin:$PATH
-    export LD_LIBRARY_PATH=/usr/local/cuda-12.9/lib64:$LD_LIBRARY_PATH
-    export CUDA_HOME=/usr/local/cuda-12.9
-fi
-
 UV_HOME="$USER_HOME/.local/bin"
 if command -v uv >/dev/null 2>&1 && command -v uvx >/dev/null 2>&1; then
     eval "$(uv generate-shell-completion zsh)"
@@ -228,12 +227,6 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 #     export GEM_HOME="$USER_HOME/.gem"
 #     export PATH="$USER_HOME/.gem/bin:$PATH"
 # fi
-
-# export web ports
-export http_proxy=http://127.0.0.1:7897
-export https_proxy=http://127.0.0.1:7897
-export all_proxy=http://127.0.0.1:7897
-
 
 # fnm
 FNM_PATH="$USER_HOME/.local/share/fnm"
@@ -268,3 +261,6 @@ if command -v cargo >/dev/null 2>&1; then
 fi
 
 unset _dotfiles_root
+
+# Machine-specific overrides run last. Keep these files outside the repository.
+[ ! -r "$HOME/.zshrc.local" ] || . "$HOME/.zshrc.local"

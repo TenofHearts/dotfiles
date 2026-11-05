@@ -30,12 +30,12 @@ class LinkTests(unittest.TestCase):
         directory = self.home / ".config/nvim"
         directory.mkdir(parents=True)
         (directory / "local.lua").write_text("local config\n")
-        links.install(self.home, False)
+        links.install(self.home, False, force=True)
         self.assertEqual(links.status(self.home), 0)
         self.assertTrue(original.is_symlink())
         self.assertTrue(directory.is_symlink())
         before = original.lstat().st_mtime_ns
-        links.install(self.home, False)
+        links.install(self.home, False, force=True)
         self.assertEqual(original.lstat().st_mtime_ns, before)
         self.assertFalse((self.home / ".local").exists())
 
@@ -114,7 +114,7 @@ class LinkTests(unittest.TestCase):
     def test_dangling_link_is_replaced(self):
         dest = self.home / ".zshrc"
         dest.symlink_to("missing-original")
-        links.install(self.home, False)
+        links.install(self.home, False, force=True)
         self.assertTrue(links.linked(dest, links.ROOT / "config/zsh/.zshrc"))
 
     def test_symlink_target_is_preserved(self):
@@ -124,23 +124,15 @@ class LinkTests(unittest.TestCase):
         original.write_text("keep\n")
         (self.home / ".config").mkdir()
         (self.home / ".config/nvim").symlink_to(target)
-        links.install(self.home, False)
+        links.install(self.home, False, force=True)
         self.assertEqual(original.read_text(), "keep\n")
         self.assertTrue(links.linked(self.home / ".config/nvim", links.ROOT / "config/nvim"))
-
-    def test_backup_parent_is_unused(self):
-        target = self.home / "elsewhere"
-        target.mkdir()
-        (self.home / ".local").symlink_to(target)
-        links.install(self.home, False)
-        self.assertEqual(links.status(self.home), 0)
-        self.assertEqual(list(target.iterdir()), [])
 
     def test_legacy_link_is_migrated(self):
         dest = self.home / ".zshrc"
         legacy = links.ROOT / ".zshrc"
         dest.symlink_to(legacy)
-        links.install(self.home, False)
+        links.install(self.home, False, force=True)
         self.assertEqual(dest.resolve(), (links.ROOT / "config/zsh/.zshrc").resolve())
         self.assertNotEqual(dest.readlink(), legacy)
 
@@ -164,3 +156,37 @@ class LinkTests(unittest.TestCase):
         links.restore(manifest, False)
         self.assertFalse(dest.is_symlink())
         self.assertEqual(dest.read_text(), "original\n")
+
+    def test_conflicts_are_skipped_and_other_links_installed(self):
+        original = self.home / ".bashrc"
+        original.write_text("keep shell\n")
+        directory = self.home / ".config/nvim"
+        directory.mkdir(parents=True)
+        (directory / "local.lua").write_text("keep editor\n")
+        dangling = self.home / ".zshrc"
+        dangling.symlink_to("missing-original")
+        links.install(self.home, False)
+        self.assertEqual(original.read_text(), "keep shell\n")
+        self.assertEqual((directory / "local.lua").read_text(), "keep editor\n")
+        self.assertEqual(os.readlink(dangling), "missing-original")
+        self.assertTrue(links.linked(self.home / ".vimrc", links.ROOT / "config/vim/.vimrc"))
+        self.assertEqual(links.status(self.home), 1)
+        links.install(self.home, False)
+        self.assertEqual(original.read_text(), "keep shell\n")
+
+    def test_force_dry_run_preserves_conflicts(self):
+        original = self.home / ".bashrc"
+        original.write_text("keep\n")
+        links.install(self.home, True, force=True)
+        self.assertEqual(original.read_text(), "keep\n")
+        self.assertEqual(list(self.home.iterdir()), [original])
+
+    def test_force_cli_replaces_only_selected_app(self):
+        shell = self.home / ".bashrc"
+        shell.write_text("keep\n")
+        vim = self.home / ".vimrc"
+        vim.write_text("replace\n")
+        subprocess.run(["bash", str(links.ROOT / "install.sh"), "--only", "vim",
+                        "--force", "--home", str(self.home)], check=True, capture_output=True)
+        self.assertTrue(vim.is_symlink())
+        self.assertEqual(shell.read_text(), "keep\n")

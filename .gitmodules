@@ -3,7 +3,7 @@
 	url = https://github.com/TenofHearts/nvim-config.git
 [submodule "config/tmux"]
 	path = config/tmux
-	url = git@github.com:TenofHearts/tmux-config.git
+	url = https://github.com/TenofHearts/tmux-config.git
 [submodule "config/codex"]
 	path = config/codex
-	url = git@github.com:TenofHearts/codex-config.git
+	url = https://github.com/TenofHearts/codex-config.git

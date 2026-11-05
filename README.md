@@ -1,23 +1,23 @@
 # Dotfiles
 
-Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and backs up existing files. Codex, Neovim, and tmux are maintained in separate Git submodules. The tmux configuration can also be installed independently on Linux, macOS, and Windows through WSL.
+Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and skips existing configurations by default. Use `--force` to delete conflicts and replace them with links; no backups are created. Codex, Neovim, and tmux are maintained in separate Git submodules. The tmux configuration can also be installed independently on Linux, macOS, and Windows through WSL.
 
 ## Quick start
 
-For Ubuntu/Debian Linux (including WSL2), `bootstrap.sh` installs software from the editable `Brewfile`, configures stable Rust with editor components, and installs the configuration links. Run it as your normal user with sudo access and an internet connection:
+For Linux (including WSL2), the optional `bootstrap.sh` installs software from the editable `Brewfile`, configures stable Rust with editor components, and installs the configuration links. Run it as your normal user with sudo access and an internet connection:
 
 ```sh
 git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
 cd dotfiles
 ./bootstrap.sh --dry-run       # Preview without downloading or changing anything
-./bootstrap.sh                 # Install software and configuration links
+./bootstrap.sh                 # Install software and links; skip existing configurations
 ./bootstrap.sh --update        # Update all listed software and stable Rust
 ./bootstrap.sh --update neovim # Install or update one app
 ```
 
-Install Git with `sudo apt-get install git` first if needed to clone the repository. Full setup installs build prerequisites through apt; software-only updates do this when Homebrew is absent, then runs the [official Homebrew installer](https://brew.sh/). Homebrew manages development tools independently of your distribution's package versions. Open a new shell afterward to load its PATH.
+Install Git with your distribution's package manager first if needed to clone the repository. When Homebrew is absent, setup installs prerequisites through a small apt/dnf/pacman adapter, then runs the [official Homebrew installer](https://brew.sh/). Existing Homebrew installations skip native package commands. Use `--skip-prerequisites` if you manage prerequisites yourself or use another distribution. Homebrew manages development tools independently of your distribution's package versions. Open a new shell afterward to load its PATH.
 
-To install only configuration links, the existing installer requires Bash, Git, and Python 3 with no third-party Python packages:
+To install only configuration links, the existing installer requires Bash, Git, and Python 3.6+ with no third-party Python packages:
 
 ```sh
 git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
@@ -25,19 +25,31 @@ cd dotfiles
 
 # Review the personal settings described below before loading a new shell.
 ./install.sh --dry-run
-./install.sh
+./install.sh                    # Preserve and skip conflicting configurations
+./install.sh --force --dry-run  # Preview deleting conflicts
+./install.sh --force            # Delete conflicts and install links (no backups)
 python3 scripts/links.py status
 ```
 
 If you already cloned without submodules, run `git submodule update --init --recursive` before previewing installation. A real installation runs that command automatically; a dry run skips it.
 
-Before opening a new shell, adapt these settings to your machine:
+Machine-specific configuration belongs outside this repository:
 
-- Both shells derive Miniconda and ICS coursework paths from `$HOME`, but retain the original project layout. Miniconda and coursework are not installed by the bootstrap.
-- Zsh exports lowercase proxy variables pointing to `http://127.0.0.1:7897`. Change or remove them if your proxy uses another address or you do not use one.
-- Existing rbenv, fnm, and Cargo environment files are loaded when available. Homebrew supplies Python, fnm, uv, and rustup; fnm manages Node.js; existing language managers or activated environments can take precedence over these tools.
-- Optional Zsh integrations load autosuggestions/syntax-highlighting from `~/.zsh` or Homebrew. Both Bash and Zsh initialize zoxide when available, using `j` as the jump command. CUDA integration targets `/usr/local/cuda-12.9` when its compiler exists; CUDA is not installed by the bootstrap.
+- `~/.bashrc.local` and `~/.zshrc.local` load last and can override shared settings. Put proxy settings, coursework paths, CUDA setup and other workstation settings here. No proxy is enabled by default.
+- `~/.zprofile.local` loads early in Zsh; use it for `TMUX_AUTOSTART=0` because tmux starts before the final local hook.
+- Existing Miniconda, rbenv, fnm and Cargo integrations load when available. Their tools or activated environments can take precedence over Homebrew tools.
+- Zsh plugins load from `~/.zsh`, Homebrew, or common distro package locations. Both shells initialize zoxide when available, using `j` as the jump command.
 - Select a Nerd Font in your terminal for prompt/editor icons. Neovim can disable icons with `vim.g.have_nerd_font = false` in `config/nvim/init.lua`.
+
+For example, add only the settings you need to your shell's local file:
+
+```sh
+export NEMU_HOME="$HOME/Programing/PA/ics2024/nemu"
+# Enable only if a proxy is running at this address:
+# export http_proxy=http://127.0.0.1:7897
+# export https_proxy="$http_proxy"
+# export all_proxy="$http_proxy"
+```
 
 Open a new Bash or Zsh session to load its configuration. For Vim, install vim-plug separately and run `:PlugInstall`. For Neovim dependencies and first-run setup, see the [Neovim README](config/nvim/README.md).
 
@@ -46,10 +58,11 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 ```text
 .
 ├── install.sh                     # Installation entry point
-├── bootstrap.sh                   # Ubuntu/Debian software setup and updates
+├── bootstrap.sh                   # Optional Linux software setup and updates
 ├── Brewfile                       # Editable software list
 ├── scripts/
 │   ├── links.py                   # Install, inspect, and restore symlinks
+│   ├── prerequisites.sh           # Native prerequisites only: apt/dnf/pacman
 │   └── set_proxy.sh               # Export host-derived proxy settings
 ├── config/
 │   ├── bash/.bashrc
@@ -70,8 +83,8 @@ Open a new Bash or Zsh session to load its configuration. For Vim, install vim-p
 │       └── lua/
 │           ├── custom/            # Language settings and extension loader
 │           └── kickstart/         # Health check and plugin modules/examples
-├── tests/test_links.py            # Installer regression tests
-└── .gitmodules                    # Neovim and tmux submodule sources
+├── tests/                        # Installer and prerequisite adapter regression tests
+└── .gitmodules                    # Codex, Neovim and tmux submodule sources
 ```
 
 The installer uses these fixed destinations under the selected home directory; it does not consult `XDG_CONFIG_HOME`:
@@ -107,11 +120,25 @@ The [Homebrew Bundle command](https://docs.brew.sh/Brew-Bundle-and-Brewfile) ins
 
 This does not change your login shell. Ruby/rbenv, MySQL, QEMU, RISC-V/multilib compilers, Miniconda, CUDA/GPU drivers, GUI applications, Nerd Fonts, and Vim plugins remain separate installations. The Neovim configuration currently requires Neovim 0.12+; check `nvim --version` against its README if Homebrew's stable package has not reached that requirement.
 
+### Homebrew tradeoffs
+
+Homebrew is the default for the optional software bootstrap because one Brewfile keeps development tools consistent across distro families and provides newer tools independently of distro release cycles. Configuration installation itself does not require Homebrew: use `./install.sh` and supply applications through your preferred package manager.
+
+The costs of using Homebrew by default are:
+
+- **Duplicate software and PATH precedence.** Distro and Homebrew copies may coexist. These shell configurations put Homebrew tools first when available, which can change which Git, Python or compiler a command uses. Use the final local shell hook to override that choice.
+- **Additional storage and maintenance.** Homebrew brings its own dependency tree; maintain it separately from system security updates. Keep system services, drivers and distro components under the native package manager.
+- **Platform and prefix constraints.** Binary package availability depends on the platform and installation prefix. The standard Linux prefix is `/home/linuxbrew/.linuxbrew`; other locations can require source builds. Homebrew is not a universal solution for every Linux system. See [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux).
+- **Rolling upgrades rather than a reproducible environment.** This Brewfile does not pin versions. Upgrades may cross major versions and upgrade related dependencies; a named update can therefore affect more than one tool. See the [Homebrew FAQ](https://docs.brew.sh/FAQ#why-does-brew-upgrade-formula-or-brew-install-formula-also-upgrade-a-bunch-of-other-stuff).
+
+Distro-specific commands live only in `scripts/prerequisites.sh` and run only when Homebrew is missing. Its apt, dnf and pacman branches cover prerequisite package mappings, not complete distro certification. Other systems can install prerequisites manually and pass `--skip-prerequisites`; this does not bypass Homebrew's own platform requirements. The adapter never performs a full distro upgrade. Review pending system updates yourself before installing prerequisites.
+
 ### `install.sh`
 
 ```sh
 ./install.sh                    # Initialize submodules and install links
 ./install.sh --dry-run          # Preview link changes without writing files
+./install.sh --force            # Delete conflicting configurations; no backups
 ./install.sh --only codex       # Install only the shared Codex profile
 ./install.sh --home /tmp/demo-home  # Install into an alternate home
 ```
@@ -121,13 +148,13 @@ Resolves the repository from its own location, updates required submodules on re
 ### `scripts/links.py`
 
 ```sh
-python3 scripts/links.py install [--only APP] [--home PATH] [--dry-run]
+python3 scripts/links.py install [--only APP] [--home PATH] [--dry-run] [--force]
 python3 scripts/links.py status [--only APP] [--home PATH]
 python3 scripts/links.py restore /path/to/manifest.json [--dry-run]
 python3 scripts/links.py --help
 ```
 
-- **Install:** checks source availability and destination parents, leaves correct links alone, and replaces conflicting files, directories, or symlinks with relative symlinks. Conflicting contents are permanently removed; no backups or manifests are created. Installation rejects symlinked destination parents such as `~/.config`. A failed installation may leave partial changes.
+- **Install:** leaves correct links alone, reports and skips existing files, directories and conflicting symlinks (including dangling links), and installs the remaining links. Skipped conflicts are not errors; use `status` to check whether all requested links are installed. `--force` permanently deletes conflicts before linking; no backups or manifests are created. `--dry-run --force` previews replacements without deleting anything. Sources and destination parents for links to be installed are checked before changes begin. Symlinked destination parents such as `~/.config` require manual review and are rejected. A failed installation may leave partial changes.
 - **Status:** reports `OK` or `MISSING/CHANGED` for each destination. Exits with code 0 when every link matches, or 1 otherwise. It checks link targets, not configuration contents or application dependencies.
 - **Restore (existing backups only):** reads a manifest from an older installation, validates all entries before changing files, removes installer links, and restores saved originals. Destinations with no original backup are simply unlinked. It refuses to overwrite a destination that has been replaced with another file or link, and refuses missing backups. The manifest contains absolute paths; `--home` does not relocate a restore.
 
@@ -144,7 +171,7 @@ python3 scripts/links.py restore "$HOME/.local/state/dotfiles/backups/<timestamp
 python3 scripts/links.py restore "$HOME/.local/state/dotfiles/backups/<timestamp>/manifest.json"
 ```
 
-Replace `<timestamp>` with the actual backup directory. Restore moves backed-up originals back into place, so that backup is consumed. Only entries changed by that installation are included. New installations cannot be undone using this command because they do not create backups.
+Replace `<timestamp>` with the actual backup directory. Restore moves backed-up originals back into place, so that backup is consumed. Only entries changed by that installation are included. New installations cannot be undone using this command because they do not create backups. This also applies to `--force`.
 
 ### `scripts/set_proxy.sh`
 
@@ -154,7 +181,7 @@ Source this script from the shell where you want its exports to persist:
 source scripts/set_proxy.sh
 ```
 
-Reads the nameserver address from `/etc/resolv.conf` and exports uppercase `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` using HTTP port `7897`. This assumes the nameserver address also reaches a proxy host, as in some WSL setups; it does not discover or start a proxy. It expects a single nameserver entry. Its uppercase variables coexist with Zsh's lowercase localhost defaults, so align both sets if clients use different capitalization.
+Reads the nameserver address from `/etc/resolv.conf` and exports uppercase `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` using HTTP port `7897`. This assumes the nameserver address also reaches a proxy host, as in some WSL setups; it does not discover or start a proxy. It expects a single nameserver entry. This helper is opt-in and is never sourced automatically. Align uppercase and lowercase variables if clients use different capitalization.
 
 To clear both sets for the current session:
 
@@ -162,23 +189,23 @@ To clear both sets for the current session:
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
 ```
 
-### `tests/test_links.py`
+### Tests
 
 ```sh
 python3 -m unittest discover -s tests -v
 ```
 
-Runs the installer tests in temporary home directories. Covers replacement without backups, repeated installation, restoration of older manifests, dry runs, changed-file protection, dangling and legacy links, and rejection of symlinked destination parents.
+Runs installer tests in temporary home directories and prerequisite dispatch tests with mocked commands; no packages are installed. Covers skipping conflicts by default, forced replacement without backups, repeated installation, restoration of older manifests, dry runs, changed-file protection, dangling and legacy links, and rejection of symlinked destination parents.
 
 ## Application configurations
 
 ### Bash
 
-[`config/bash/.bashrc`](config/bash/.bashrc) provides a familiar shell for everyday command-line work and development. It builds on standard Debian-style Bash defaults, keeping established shell behavior while making development tools easier to access. The guiding principle is practical convenience through straightforward startup configuration. Some paths reflect the original workstation, so adapting it to another machine requires reviewing those assumptions.
+[`config/bash/.bashrc`](config/bash/.bashrc) provides a familiar shell for everyday command-line work and development. It builds on familiar Bash defaults, keeping established shell behavior while making development tools easier to access. The guiding principle is practical convenience through straightforward startup configuration. Use `~/.bashrc.local` for workstation-specific paths and settings.
 
 ### Zsh
 
-[`config/zsh/.zshrc`](config/zsh/.zshrc) configures the main interactive development shell. Its emphasis is on reducing friction during everyday terminal work and making language environments convenient to use. User-specific paths generally derive from `$HOME`, making the configuration easier to reuse across accounts. The overall approach is to keep environment setup in one place and load optional integrations conditionally where supported, while retaining some machine-specific assumptions described in the quick start.
+[`config/zsh/.zshrc`](config/zsh/.zshrc) configures the main interactive development shell. Its emphasis is on reducing friction during everyday terminal work and making language environments convenient to use. User-specific paths generally derive from `$HOME`, making the configuration easier to reuse across accounts. The overall approach is to keep environment setup in one place and load optional integrations conditionally where supported, with final machine-specific overrides in `~/.zshrc.local`.
 
 ### tmux
 

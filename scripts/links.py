@@ -25,7 +25,7 @@ def exists(path):
 
 
 def linked(dest, source):
-    return dest.is_symlink() and Path(os.path.abspath(dest.parent / dest.readlink())) == source.absolute()
+    return dest.is_symlink() and Path(os.path.abspath(dest.parent / os.readlink(dest))) == source.absolute()
 
 
 def check_parents(dest, home):
@@ -41,16 +41,20 @@ def selected_files(only=None):
             if only is None or src.split("/")[1] == only}
 
 
-def install(home, dry_run, only=None):
+def install(home, dry_run, only=None, force=False):
     pending = [(home / name, ROOT / src) for name, src in selected_files(only).items()
                if not linked(home / name, ROOT / src)]
+    conflicts = [(dest, source) for dest, source in pending if exists(dest) and not force]
+    for dest, source in conflicts:
+        print(f"Skip existing configuration: {dest} (use --force to replace)")
+    pending = [(dest, source) for dest, source in pending if force or not exists(dest)]
     # Never follow a parent directory link into an unrelated checkout.
     for dest, source in pending:
         if not source.exists():
             raise RuntimeError(f"Missing source: {source}")
         check_parents(dest, home)
     if not pending:
-        print("All configuration links are already installed.")
+        print("No configuration links to install.")
         return
     for dest, source in pending:
         print(f"{'Replace and link' if exists(dest) else 'Link'} {dest} -> {source}")
@@ -102,14 +106,17 @@ def main():
     parser.add_argument("manifest", nargs="?", type=Path)
     parser.add_argument("--home", type=Path, default=Path.home(), help="Alternate home for testing")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--force", action="store_true", help="Delete conflicting configurations before installing links; no backups")
     parser.add_argument("--only", choices=sorted({src.split("/")[1] for src in FILES.values()}),
                         help="Install or inspect only this application's configuration")
     args = parser.parse_args()
     if args.only and args.action == "restore":
         parser.error("--only applies to install and status; restore uses its backup manifest")
+    if args.force and args.action != "install":
+        parser.error("--force applies only to install")
     home = args.home.absolute()
     if args.action == "install":
-        install(home, args.dry_run, args.only)
+        install(home, args.dry_run, args.only, args.force)
     elif args.action == "status":
         return status(home, args.only)
     else:
