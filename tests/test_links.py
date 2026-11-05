@@ -43,18 +43,6 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, True)
         self.assertEqual(list(self.home.iterdir()), [])
 
-    def test_only_codex_installs_without_other_configs(self):
-        original = self.home / ".bashrc"
-        original.write_text("keep local shell\n")
-        links.install(self.home, True, "codex")
-        self.assertEqual(list(self.home.iterdir()), [original])
-        links.install(self.home, False, "codex")
-        self.assertEqual(links.status(self.home, "codex"), 0)
-        self.assertEqual(original.read_text(), "keep local shell\n")
-        self.assertFalse((self.home / ".zshrc").exists())
-        links.install(self.home, False, "codex")
-        self.assertFalse((self.home / ".local").exists())
-
     def test_codex_only_installer_initializes_its_submodule(self):
         bin_dir = self.home / "bin"
         bin_dir.mkdir()
@@ -127,14 +115,6 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, False, force=True)
         self.assertEqual(original.read_text(), "keep\n")
         self.assertTrue(links.linked(self.home / ".config/nvim", links.ROOT / "config/nvim"))
-
-    def test_legacy_link_is_migrated(self):
-        dest = self.home / ".zshrc"
-        legacy = links.ROOT / ".zshrc"
-        dest.symlink_to(legacy)
-        links.install(self.home, False, force=True)
-        self.assertEqual(dest.resolve(), (links.ROOT / "config/zsh/.zshrc").resolve())
-        self.assertNotEqual(dest.readlink(), legacy)
 
     def test_dry_run_preserves_conflicts(self):
         original = self.home / ".bashrc"

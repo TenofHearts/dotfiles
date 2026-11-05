@@ -1,93 +1,180 @@
 # Dotfiles
 
-Personal shell, editor, terminal multiplexer, and prompt configuration for a Linux development environment. Configuration lives in `config/`; the installer links it into your home directory and skips existing configurations by default. Use `--force` to delete conflicts and replace them with links; no backups are created. Codex, Neovim, and tmux are maintained in separate Git submodules. The tmux configuration can also be installed independently on Linux, macOS, and Windows through WSL.
+Personal shell, editor, tmux and prompt configuration for Linux. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
+
+Software management is optional and independent of configuration installation. One TOML manifest selects applications; small apt, dnf, pacman and Homebrew adapters handle package operations. Codex, Neovim and tmux configurations are pinned Git submodules.
 
 ## Quick start
 
-For Linux (including WSL2), the optional `bootstrap.sh` installs software from the editable `Brewfile`, configures stable Rust with editor components, and installs the configuration links. Run it as your normal user with sudo access and an internet connection:
-
-```sh
-git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
-cd dotfiles
-./bootstrap.sh --dry-run       # Preview without downloading or changing anything
-./bootstrap.sh                 # Install software and links; skip existing configurations
-./bootstrap.sh --update        # Update all listed software and stable Rust
-./bootstrap.sh --update neovim # Install or update one app
-```
-
-Install Git with your distribution's package manager first if needed to clone the repository. When Homebrew is absent, setup installs prerequisites through a small apt/dnf/pacman adapter, then runs the [official Homebrew installer](https://brew.sh/). Existing Homebrew installations skip native package commands. Use `--skip-prerequisites` if you manage prerequisites yourself or use another distribution. Homebrew manages development tools independently of your distribution's package versions. Open a new shell afterward to load its PATH.
-
-To install only configuration links, the existing installer requires Bash, Git, and Python 3.6+ with no third-party Python packages:
+Install Git and Python through your distribution first, then:
 
 ```sh
 git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
 cd dotfiles
 
-# Review the personal settings described below before loading a new shell.
+# Configuration only: Bash, Git and Python 3.6+, no third-party packages.
 ./install.sh --dry-run
-./install.sh                    # Preserve and skip conflicting configurations
-./install.sh --force --dry-run  # Preview deleting conflicts
-./install.sh --force            # Delete conflicts and install links (no backups)
+./install.sh
 python3 scripts/links.py status
 ```
 
-If you already cloned without submodules, run `git submodule update --init --recursive` before previewing installation. A real installation runs that command automatically; a dry run skips it.
+For software management, use **Python 3.11+**, or Python 3.8+ with `tomli` installed in that interpreter. The linker does not need TOML support. On older systems, install `tomli` through your distro or a Python environment; the software command reports a missing parser before making changes.
 
-Machine-specific configuration belongs outside this repository:
+```sh
+./scripts/software.py plan                   # Inspect providers, conflicts and commands
+./bootstrap.sh --dry-run                     # Preview software and configuration setup
+./bootstrap.sh                              # Install missing software, then link configuration
+./bootstrap.sh --software-only --group core  # Install only core software
+./scripts/toolchains.sh --dry-run            # Separate Node LTS/Rust stable setup
+./scripts/toolchains.sh
+```
 
-- `~/.bashrc.local` and `~/.zshrc.local` load last and can override shared settings. Put proxy settings, coursework paths, CUDA setup and other workstation settings here. No proxy is enabled by default.
-- `~/.zprofile.local` loads early in Zsh; use it for `TMUX_AUTOSTART=0` because tmux starts before the final local hook.
-- Existing Miniconda, rbenv, fnm and Cargo integrations load when available. Their tools or activated environments can take precedence over Homebrew tools.
-- Zsh plugins load from `~/.zsh`, Homebrew, or common distro package locations. Both shells initialize zoxide when available, using `j` as the jump command.
-- Select a Nerd Font in your terminal for prompt/editor icons. Neovim can disable icons with `vim.g.have_nerd_font = false` in `config/nvim/init.lua`.
+Review `software/manifest.toml` first. Native packages are the default. Neovim, Oh My Posh, uv, fnm and rustup explicitly use Homebrew; zoxide also retains its existing Homebrew provider. The optional `fun` group contains fortune/cowsay/lolcat. Bootstrap provisions Homebrew only if a selected application requires it and it is missing. Configuration installation alone never provisions it.
 
-For example, add only the settings you need to your shell's local file:
+**Migrating an existing Homebrew workstation:** provider conflicts are reported and block transactions. For example, if fd is already installed through Homebrew, add `[software.fd]` with `provider = "brew"` to retain it. To migrate providers, remove the old provider's packages yourself, then install through the chosen provider. This tool never automatically removes packages or rewrites your manifest. It detects duplicates between the host's native package database and Homebrew, not arbitrary manually installed binaries.
+
+Existing clones can adopt the HTTPS submodule URLs with `git submodule sync --recursive` before updating submodules. Public submodules need no GitHub SSH setup; private repositories still require access.
+
+## Software manifest
+
+Edit desired applications and providers in [`software/manifest.toml`](software/manifest.toml):
+
+```toml
+[defaults]
+provider = "native"
+groups = ["core", "editors", "development"]
+
+[groups]
+core = ["git", "zsh", "tmux", "ripgrep", "fd"]
+editors = ["vim", "neovim"]
+development = ["uv", "fnm", "rustup"]
+
+[software.neovim]
+provider = "brew"
+command = "nvim"
+minimum_version = "0.12"
+```
+
+Groups choose what to install. Application IDs are independent of distro package names. Explicit names and `--group` selections are combined; with neither, the default groups are selected. Repeat `--group` to combine groups.
+
+[`software/packages.toml`](software/packages.toml) maps IDs to provider-specific package names:
+
+```toml
+[packages.fd]
+apt = ["fd-find"]
+dnf = ["fd-find"]
+pacman = ["fd"]
+brew = ["fd"]
+
+[packages.git]
+default = ["git"]
+```
+
+To add software, add a catalog mapping, then include its ID in a group. `default` is shorthand for names shared by all adapters; omit it when support differs. An absent mapping is an error, never an automatic fallback or a guessed package name. Package availability depends on your distro release and enabled repositories. The tool does not enable repositories, install AUR helpers, or promise that every catalog entry exists on every supported release. On Debian/Ubuntu the fd package commonly provides `fdfind`; installing a package does not rename its commands.
+
+```sh
+./scripts/software.py plan --group core
+./scripts/software.py install --group core
+./scripts/software.py check
+./scripts/software.py update neovim uv
+./scripts/software.py install git fd
+./scripts/software.py plan --provider brew          # Override all selected providers
+./scripts/software.py plan --native-manager dnf     # Override host detection
+./scripts/software.py install --dry-run --group fun
+```
+
+- **Plan / dry run:** read installed-package databases and print transactions; no downloads, package changes, or local state files. Plans may include commands for a missing manager. A real direct install requires that manager to exist; bootstrap can explicitly provision Homebrew.
+- **Install:** resolve all selected applications and provider conflicts before executing transactions. Install only missing packages, without explicitly upgrading already installed applications. Dependency resolution can still change related packages. Native managers retain their normal interactive transaction prompts.
+- **Check:** exit 0 if selected packages are installed through the selected provider, without detected duplicates, and declared minimum executable versions are met. Otherwise exit 1. This is not a general application health check or a reproducibility guarantee.
+- **Update:** explicitly update selected installed applications. Missing applications require `install` first. Dependencies may also be upgraded. On Arch, native updates are refused: run `sudo pacman -Syu` separately, then check again. Native installs use `pacman -S --needed`, never a standalone database refresh; maintain the system before installing packages.
+- **Provider changes / removals:** no automatic migration, uninstallation, cleanup or full system upgrade. Removing a manifest entry leaves installed software in place.
+
+Minimum versions are checked against the selected provider's executable after real installs/updates and during `check`. A too-old distro candidate causes a failure with guidance; the tool does not automatically switch providers. Installing a package successfully does not guarantee it meets the declared version. No package transaction rollback is attempted on failure.
+
+The old hand-maintained Brewfile has been replaced by this manifest. Export a generated Brewfile when useful:
+
+```sh
+# Only applications currently assigned to Homebrew:
+./scripts/software.py export-brewfile > /tmp/dotfiles.Brewfile
+# A full Homebrew selection for another workstation:
+./scripts/software.py export-brewfile --provider brew > /tmp/dotfiles-all.Brewfile
+```
+
+## Bootstrap and runtime setup
+
+`bootstrap.sh` wraps software installation and the independent dotfile installer:
+
+```sh
+./bootstrap.sh --dry-run
+./bootstrap.sh --group core --software-only
+./bootstrap.sh --force                # Delete conflicting configurations; no backups
+./bootstrap.sh --update neovim uv     # Software updates only
+./bootstrap.sh --skip-prerequisites   # Supply Homebrew prerequisites yourself
+```
+
+Native detection uses `ID` and `ID_LIKE` from `/etc/os-release`, not whichever package-manager executable happens to be on PATH. `--native-manager apt|dnf|pacman` overrides it. Unknown distro families require an explicit native adapter choice or an all-Homebrew selection. Immutable systems and special packaging environments may need manual setup.
+
+Homebrew provisioning is isolated in `software/bootstrap.py`. It uses the same catalog/adapters to install native build prerequisites, downloads the [official installer](https://github.com/Homebrew/install), and runs it as the normal user. Existing Homebrew skips this step. `--skip-prerequisites` also permits provisioning on systems outside the native adapters if you supply the prerequisites and select only Homebrew applications. Direct `software.py install` does not provision Homebrew unless passed `--bootstrap-brew`.
+
+Application installation does not initialize language runtimes. Run separately:
+
+```sh
+./scripts/toolchains.sh node   # Install current Node LTS through fnm
+./scripts/toolchains.sh rust   # Install stable Rust plus editor components
+./scripts/toolchains.sh        # Both
+```
+
+Existing Node/Rust defaults are preserved where the managers support this; Rust defaults to stable only when no default exists. This replaces the previous automatic runtime setup in bootstrap. `--update node` is no longer a package-manager alias: use fnm directly for a non-LTS Node release. Global npm packages are not copied between Node versions.
+
+## Homebrew tradeoffs
+
+Homebrew provides a convenient shared catalog and recent development tools across distro release cycles. It remains useful for explicit version-sensitive exceptions, or as an override for the entire software selection. Configuration installation does not require it.
+
+Costs include duplicate distro/Homebrew tools, PATH precedence changes, additional dependency storage and a second update workflow. Its binary package and platform support depend on the host and installation prefix. A manifest of unversioned names is not a reproducible environment, and updates may affect dependencies beyond the requested application. See [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux), [support tiers](https://docs.brew.sh/Support-Tiers), and the [Homebrew FAQ](https://docs.brew.sh/FAQ).
+
+Keep services, drivers and system components under the distro package manager. These shells initialize Homebrew when available, potentially preferring its tools; use your final local shell hook to change PATH precedence.
+
+## Machine-specific settings
+
+- `~/.bashrc.local` and `~/.zshrc.local` load last. Put proxy settings, coursework paths, CUDA setup and other workstation settings here. No proxy is enabled by default.
+- `~/.zprofile.local` loads early in Zsh. Use it for `TMUX_AUTOSTART=0`, since tmux starts before the final hook.
+- Existing Miniconda, rbenv, fnm and Cargo integrations load when available. Activated environments can change tool precedence.
+- Zsh plugins load from `~/.zsh`, Homebrew, or common distro package locations. Both shells initialize zoxide with `j` as the jump command when available.
+- Select a Nerd Font for prompt/editor icons, or disable Neovim icons with `vim.g.have_nerd_font = false`.
+
+For example, add only the settings you need to the shell's local file:
 
 ```sh
 export NEMU_HOME="$HOME/Programing/PA/ics2024/nemu"
-# Enable only if a proxy is running at this address:
+# Enable only if a proxy is running:
 # export http_proxy=http://127.0.0.1:7897
 # export https_proxy="$http_proxy"
 # export all_proxy="$http_proxy"
 ```
 
-Open a new Bash or Zsh session to load its configuration. For Vim, install vim-plug separately and run `:PlugInstall`. For Neovim dependencies and first-run setup, see the [Neovim README](config/nvim/README.md).
+This does not change your login shell. Vim plugins, Nerd Fonts, Miniconda, CUDA/drivers and GUI applications remain separate installations. For Neovim dependencies and first-run setup, see its [README](config/nvim/README.md).
 
-## Repository structure
+## Repository layout
 
 ```text
-.
-├── install.sh                     # Installation entry point
-├── bootstrap.sh                   # Optional Linux software setup and updates
-├── Brewfile                       # Editable software list
-├── scripts/
-│   ├── links.py                   # Install, inspect, and restore symlinks
-│   ├── prerequisites.sh           # Native prerequisites only: apt/dnf/pacman
-│   └── set_proxy.sh               # Export host-derived proxy settings
-├── config/
-│   ├── bash/.bashrc
-│   ├── zsh/.zshrc
-│   ├── vim/.vimrc
-│   ├── codex/                     # Git submodule: shared Codex CLI preferences
-│   │   ├── dotfiles.config.toml
-│   │   └── README.md
-│   ├── tmux/                      # Git submodule: shared tmux configuration
-│   │   ├── .tmux.conf
-│   │   └── README.md              # Standalone setup and sync instructions
-│   ├── oh-my-posh/theme.omp.json
-│   ├── cowsay/stegosaurus_and_cat.cow
-│   └── nvim/                      # Git submodule: TenofHearts/nvim-config
-│       ├── init.lua               # Editor options and active plugins
-│       ├── nvim-pack-lock.json    # Pinned plugin revisions
-│       ├── formatters/clang-format.yaml
-│       └── lua/
-│           ├── custom/            # Language settings and extension loader
-│           └── kickstart/         # Health check and plugin modules/examples
-├── tests/                        # Installer and prerequisite adapter regression tests
-└── .gitmodules                    # Codex, Neovim and tmux submodule sources
+bootstrap.sh             # Optional software setup, then configuration links
+install.sh               # Configuration installer
+software/
+  manifest.toml          # Application groups and provider choices
+  packages.toml          # Package-name mappings, including build prerequisites
+  manager.py             # Detection, selection, status and transaction planning
+  bootstrap.py           # Optional Homebrew provisioning
+  adapters/              # apt, dnf, pacman, Homebrew
+scripts/
+  software.py            # Software CLI
+  toolchains.sh          # Explicit Node/Rust runtime setup
+  links.py               # Install, inspect, restore configuration links
+  set_proxy.sh           # Opt-in proxy helper
+config/                  # Shell/editor/prompt configuration and Git submodules
+tests/                   # File-preservation and package-transaction safety tests
 ```
 
-The installer uses these fixed destinations under the selected home directory; it does not consult `XDG_CONFIG_HOME`:
+The linker uses fixed destinations under the selected home and does not consult `XDG_CONFIG_HOME`. It rejects symlinked destination parents rather than following them into another configuration tree. Configuration sources remain in this checkout; keep it in place.
 
 | Source | Destination |
 | --- | --- |
@@ -100,38 +187,7 @@ The installer uses these fixed destinations under the selected home directory; i
 | `config/oh-my-posh/theme.omp.json` | `~/.config/oh-my-posh/theme.omp.json` |
 | `config/cowsay/stegosaurus_and_cat.cow` | `~/.config/cowsay/stegosaurus_and_cat.cow` |
 
-## Script usage
-
-### `bootstrap.sh` and `Brewfile`
-
-```sh
-./bootstrap.sh                         # Software, Rust components, and dotfile links
-./bootstrap.sh --software-only         # Software and Rust components only
-./bootstrap.sh --update                # Upgrade everything in Brewfile and stable Rust
-./bootstrap.sh --update neovim uv       # Install/upgrade selected Homebrew formulae only
-./bootstrap.sh --dry-run --update       # Preview updates
-```
-
-Edit `Brewfile` to choose what belongs on every machine. It includes shells/plugins, Vim/Neovim, tmux, search tools, Oh My Posh, Python, uv, fnm, Rust tooling, and build helpers. Add a line such as `brew "jq"` to keep another tool in your standard setup. A named update can install a formula outside this list, but does not add it to the file.
-
-The software list includes fnm, uv, rustup, zoxide, Zsh plugins, tmux, Vim/Neovim, Oh My Posh, CMake, ccache, htop, rsync, wget, and the shell's fortune/cowsay/lolcat greeting. Ripgrep and fd provide the editor's search dependencies independently of tools bundled with other applications. Ruby/rbenv, MySQL, QEMU, RISC-V/multilib compilers, and opam were left optional because they serve particular projects. Docker is currently supplied by Windows Docker Desktop through WSL, so the bootstrap does not install a competing Linux daemon.
-
-The [Homebrew Bundle command](https://docs.brew.sh/Brew-Bundle-and-Brewfile) installs missing packages and upgrades listed packages. “Latest” means the stable version currently packaged by Homebrew; unversioned entries can cross major versions. Full setup/update installs the latest Node LTS through fnm, preserving an existing default. `./bootstrap.sh --update node` installs the latest Node release through fnm; use `fnm use <version>` and `fnm default <version>` to switch when ready. The first fnm installation supplies a default on a new machine. Global npm packages are not copied between Node versions. Rust uses the latest stable toolchain with `rust-analyzer`, `rust-src`, `rustfmt`, and `clippy`. An existing default Rust toolchain is preserved. Removing an entry does not uninstall software. The bootstrap stops on a failed command; rerun it after fixing the cause. Software installation is not rolled back by the link installer's restore command.
-
-This does not change your login shell. Ruby/rbenv, MySQL, QEMU, RISC-V/multilib compilers, Miniconda, CUDA/GPU drivers, GUI applications, Nerd Fonts, and Vim plugins remain separate installations. The Neovim configuration currently requires Neovim 0.12+; check `nvim --version` against its README if Homebrew's stable package has not reached that requirement.
-
-### Homebrew tradeoffs
-
-Homebrew is the default for the optional software bootstrap because one Brewfile keeps development tools consistent across distro families and provides newer tools independently of distro release cycles. Configuration installation itself does not require Homebrew: use `./install.sh` and supply applications through your preferred package manager.
-
-The costs of using Homebrew by default are:
-
-- **Duplicate software and PATH precedence.** Distro and Homebrew copies may coexist. These shell configurations put Homebrew tools first when available, which can change which Git, Python or compiler a command uses. Use the final local shell hook to override that choice.
-- **Additional storage and maintenance.** Homebrew brings its own dependency tree; maintain it separately from system security updates. Keep system services, drivers and distro components under the native package manager.
-- **Platform and prefix constraints.** Binary package availability depends on the platform and installation prefix. The standard Linux prefix is `/home/linuxbrew/.linuxbrew`; other locations can require source builds. Homebrew is not a universal solution for every Linux system. See [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux).
-- **Rolling upgrades rather than a reproducible environment.** This Brewfile does not pin versions. Upgrades may cross major versions and upgrade related dependencies; a named update can therefore affect more than one tool. See the [Homebrew FAQ](https://docs.brew.sh/FAQ#why-does-brew-upgrade-formula-or-brew-install-formula-also-upgrade-a-bunch-of-other-stuff).
-
-Distro-specific commands live only in `scripts/prerequisites.sh` and run only when Homebrew is missing. Its apt, dnf and pacman branches cover prerequisite package mappings, not complete distro certification. Other systems can install prerequisites manually and pass `--skip-prerequisites`; this does not bypass Homebrew's own platform requirements. The adapter never performs a full distro upgrade. Review pending system updates yourself before installing prerequisites.
+## Configuration scripts
 
 ### `install.sh`
 
@@ -195,7 +251,7 @@ unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
 python3 -m unittest discover -s tests -v
 ```
 
-Runs installer tests in temporary home directories and prerequisite dispatch tests with mocked commands; no packages are installed. Covers skipping conflicts by default, forced replacement without backups, repeated installation, restoration of older manifests, dry runs, changed-file protection, dangling and legacy links, and rejection of symlinked destination parents.
+Runs installer tests in temporary home directories and software safety tests with fake package managers; no packages are installed. Covers skipping conflicts by default, forced replacement without backups, repeated installation, restoration of older manifests, dry runs, changed-file protection, dangling links, and rejection of symlinked destination parents.
 
 ## Application configurations
 

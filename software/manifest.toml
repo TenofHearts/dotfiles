@@ -1,0 +1,33 @@
+# Desired software. Native is the default; exceptions explicitly use Homebrew.
+# Removing an entry never uninstalls it. Names here are stable application IDs.
+[defaults]
+provider = "native"
+groups = ["core", "editors", "development"]
+
+[groups]
+core = ["git", "zsh", "zsh-autosuggestions", "zsh-syntax-highlighting", "tmux", "less", "ripgrep", "fd", "zoxide", "htop", "rsync", "wget", "unzip", "zip"]
+editors = ["vim", "neovim", "oh-my-posh"]
+development = ["python", "uv", "fnm", "rustup", "cmake", "pkgconf", "ccache"]
+fun = ["cowsay", "fortune", "lolcat"]
+
+# These tools have deliberately selected providers rather than silent fallbacks.
+# Retain the existing workstation's Homebrew zoxide installation.
+[software.zoxide]
+provider = "brew"
+
+[software.neovim]
+provider = "brew"
+command = "nvim"
+minimum_version = "0.12"
+
+[software.oh-my-posh]
+provider = "brew"
+
+[software.uv]
+provider = "brew"
+
+[software.fnm]
+provider = "brew"
+
+[software.rustup]
+provider = "brew"
