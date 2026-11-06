@@ -83,7 +83,7 @@ alias l='ls -CF'
 alias cls='clear'
 
 # Shared Codex preferences; ~/.codex/config.toml stays machine-local.
-alias codex='codex --profile dotfiles'
+alias cx='codex --profile dotfiles'
 
 # some aliases added by me
 alias ga='git add'
