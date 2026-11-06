@@ -182,7 +182,7 @@ The linker uses fixed destinations under the selected home and does not consult 
 | `config/zsh/.zshrc` | `~/.zshrc` |
 | `config/vim/.vimrc` | `~/.vimrc` |
 | `config/tmux/.tmux.conf` | `~/.tmux.conf` |
-| `config/codex/dotfiles.config.toml` | `~/.codex/dotfiles.config.toml` |
+| `config/ai/codex/dotfiles.config.toml` | `~/.codex/dotfiles.config.toml` |
 | `config/nvim/` | `~/.config/nvim` |
 | `config/oh-my-posh/theme.omp.json` | `~/.config/oh-my-posh/theme.omp.json` |
 | `config/cowsay/stegosaurus_and_cat.cow` | `~/.config/cowsay/stegosaurus_and_cat.cow` |
@@ -277,9 +277,9 @@ export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1
 
 [`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) provides persistent window, pane, and resize modes with Vim-style navigation, colored status badges, and Ctrl+h help in a scrollable popup. New windows and splits preserve the current directory. Alt navigation remains available to the desktop window manager, including GlazeWM. The configuration uses tmux's built-in key tables and pickers without a plugin framework; it requires tmux 3.2 or newer and `less`.
 
-### Codex
+### AI agents
 
-[`config/codex/`](config/codex/) provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. It is maintained in a separate Git submodule. Bash and Zsh load the profile through the `codex` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
+[`config/ai/`](config/ai/) contains shared AI agent configuration from [TenofHearts/ai-config](https://github.com/TenofHearts/ai-config), organized by agent. Its [`codex/`](config/ai/codex/) directory provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. It is maintained in a separate Git submodule. Bash and Zsh load the profile through the `codex` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
 
 ### Vim
 
@@ -301,7 +301,7 @@ export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1
 
 Edit files under `config/`; installed symlinks expose those edits directly. If you move the checkout, rerun installation to repair links. To add another managed configuration, add its destination/source pair to `FILES` in `scripts/links.py`.
 
-For Codex, Neovim, or tmux changes, commit and push inside `config/codex`, `config/nvim`, or `config/tmux` first, then commit the updated submodule reference in this repository. See their READMEs for setup and syncing instructions.
+For AI agent, Neovim, or tmux changes, commit and push inside `config/ai`, `config/nvim`, or `config/tmux` first, then commit the updated submodule reference in this repository. See their READMEs for setup and syncing instructions.
 
 To bring an existing checkout to its committed submodule revision after pulling:
 

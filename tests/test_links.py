@@ -58,7 +58,7 @@ class LinkTests(unittest.TestCase):
                                 "--home", str(self.home)], env=env, check=True, capture_output=True)
                 self.assertEqual(log.read_text().splitlines(),
                                  ["-C", str(links.ROOT), "submodule", "update", "--init",
-                                  "--recursive", "--", "config/codex"])
+                                  "--recursive", "--", "config/ai"])
         self.assertTrue((self.home / ".codex/dotfiles.config.toml").is_symlink())
         self.assertFalse((self.home / ".bashrc").exists())
 

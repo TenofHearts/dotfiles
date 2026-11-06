@@ -13,7 +13,7 @@ FILES = {
     ".zshrc": "config/zsh/.zshrc",
     ".vimrc": "config/vim/.vimrc",
     ".tmux.conf": "config/tmux/.tmux.conf",
-    ".codex/dotfiles.config.toml": "config/codex/dotfiles.config.toml",
+    ".codex/dotfiles.config.toml": "config/ai/codex/dotfiles.config.toml",
     ".config/nvim": "config/nvim",
     ".config/oh-my-posh/theme.omp.json": "config/oh-my-posh/theme.omp.json",
     ".config/cowsay/stegosaurus_and_cat.cow": "config/cowsay/stegosaurus_and_cat.cow",
@@ -36,9 +36,14 @@ def check_parents(dest, home):
             raise RuntimeError(f"Symlinked parent needs manual review: {parent}")
 
 
+def application(source):
+    parts = source.split("/")
+    return parts[2] if parts[1] == "ai" else parts[1]
+
+
 def selected_files(only=None):
     return {name: src for name, src in FILES.items()
-            if only is None or src.split("/")[1] == only}
+            if only is None or application(src) == only}
 
 
 def install(home, dry_run, only=None, force=False):
@@ -107,7 +112,7 @@ def main():
     parser.add_argument("--home", type=Path, default=Path.home(), help="Alternate home for testing")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true", help="Delete conflicting configurations before installing links; no backups")
-    parser.add_argument("--only", choices=sorted({src.split("/")[1] for src in FILES.values()}),
+    parser.add_argument("--only", choices=sorted({application(src) for src in FILES.values()}),
                         help="Install or inspect only this application's configuration")
     args = parser.parse_args()
     if args.only and args.action == "restore":
