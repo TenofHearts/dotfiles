@@ -8,6 +8,9 @@ case $- in
       *) return;;
 esac
 
+# Load machine-specific environment settings before tmux.
+[ ! -r "$HOME/.bash_profile.local" ] || . "$HOME/.bash_profile.local"
+
 # Find Homebrew before initializing prompts and development tools.
 if ! command -v brew >/dev/null 2>&1; then
     for _brew in /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
@@ -26,16 +29,36 @@ if command -v brew >/dev/null 2>&1; then
     unset _tool_bin
 fi
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
+# Reuse the same persistent session as Zsh in interactive terminals.
+if [[ -t 0 && -t 1 && -z "$TMUX" && "$TERM_PROGRAM" != vscode &&
+      "${TMUX_AUTOSTART:-1}" != 0 && -n "$TERM" && "$TERM" != dumb ]] &&
+      command -v tmux >/dev/null 2>&1; then
+    tmux new-session -A -s main
+fi
 
-# append to the history file, don't overwrite it
+# Keep recent commands shared between interactive Bash sessions.
+HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=1000
-HISTFILESIZE=2000
+HISTFILESIZE=1000
+_dotfiles_sync_history() {
+    history -a
+    history -n
+}
+# Preserve prompt hooks installed by the terminal or other tools.
+if [[ "$(declare -p PROMPT_COMMAND 2>/dev/null)" == 'declare -a '* ]]; then
+    [[ ";${PROMPT_COMMAND[*]};" == *'_dotfiles_sync_history'* ]] ||
+        PROMPT_COMMAND=(_dotfiles_sync_history "${PROMPT_COMMAND[@]}")
+elif [[ ";${PROMPT_COMMAND:-};" != *'_dotfiles_sync_history'* ]]; then
+    PROMPT_COMMAND="_dotfiles_sync_history${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+fi
+
+# Match Zsh's Emacs editing mode and use Bash's native completion controls.
+set -o emacs
+bind 'set completion-ignore-case on'
+bind 'set show-all-if-ambiguous on'
+bind 'set colored-stats on'
+bind 'set colored-completion-prefix on'
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -112,7 +135,7 @@ alias l='ls -CF'
 alias cls='clear'
 
 # Shared Codex preferences; ~/.codex/config.toml stays machine-local.
-alias codex='codex --profile dotfiles'
+alias cx='codex --profile dotfiles'
 
 # some aliases added by me
 alias ga='git add'
@@ -163,31 +186,10 @@ if [ -x "$HOME/miniconda3/bin/conda" ]; then
 fi
 # <<< conda initialize <<<
 
-# export OSH="$HOME/.oh-my-bash"
-
-# OSH_THEME="powerbash10k"
-
-# OMB_USE_SUDO=true
-
-# completions=(
-# 		git
-#	  	ssh
-# )
-
-# plugins=(
-#	  	git
-#	 	  bashmarks
-# )
-
-# source "$OSH"/oh-my-bash.sh
-
-# OMB_PROMPT_SHOW_PYTHON_VENV=true
-# THEME_SHOW_PYTHON=true
-
 alias cact='conda activate'
 alias cdac='conda deactivate'
 
-export PATH=$PATH:$HOME/.local/bin
+[ ! -d "$HOME/.local/bin" ] || export PATH="$PATH:$HOME/.local/bin"
 
 _dotfiles_root="$(dirname "$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")")"
 _dotfiles_theme="$HOME/.config/oh-my-posh/theme.omp.json"
@@ -195,7 +197,7 @@ _dotfiles_theme="$HOME/.config/oh-my-posh/theme.omp.json"
 if command -v oh-my-posh >/dev/null && [ -r "$_dotfiles_theme" ]; then
     eval "$(oh-my-posh init bash --config "$_dotfiles_theme")"
 fi
-unset _dotfiles_root _dotfiles_theme
+unset _dotfiles_theme
 export PATH="$HOME/.rbenv/bin:$PATH"
 if command -v rbenv >/dev/null 2>&1; then
     eval "$(rbenv init - bash)"
@@ -223,6 +225,55 @@ fi
 if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init bash --cmd j)"
 fi
+
+# Match the optional Zsh welcome message.
+if command -v fortune >/dev/null 2>&1 && command -v cowsay >/dev/null 2>&1; then
+    _dotfiles_cow="$HOME/.config/cowsay/stegosaurus_and_cat.cow"
+    [ -r "$_dotfiles_cow" ] || _dotfiles_cow="$_dotfiles_root/config/cowsay/stegosaurus_and_cat.cow"
+    if [ -r "$_dotfiles_cow" ]; then
+        if command -v lolcat >/dev/null 2>&1; then
+            fortune | cowsay -f "$_dotfiles_cow" | lolcat
+        else
+            fortune | cowsay -f "$_dotfiles_cow"
+        fi
+    fi
+    unset _dotfiles_cow
+fi
+
+if command -v uv >/dev/null 2>&1 && command -v uvx >/dev/null 2>&1; then
+    eval "$(uv generate-shell-completion bash)"
+    eval "$(uvx --generate-shell-completion bash)"
+    uvac() {
+        if [[ -r .venv/bin/activate ]]; then
+            source .venv/bin/activate
+        else
+            printf '\033[0;31mNo .venv activation script found in the current path.\033[0m\n'
+        fi
+    }
+    uvi() {
+        local had_main_py=0
+        [[ -f main.py ]] && had_main_py=1
+        uv init --no-readme --vcs none "$@" || return
+        if [[ $had_main_py -eq 0 && -f main.py ]]; then
+            rm main.py
+        fi
+    }
+    alias uva='uv add'
+    alias uvr='uv run'
+fi
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
+if command -v cargo >/dev/null 2>&1; then
+    alias cg='cargo'
+    alias cgi='cargo init --vcs none'
+    alias cgn='cargo new --vcs none'
+    alias cgb='cargo build'
+    alias cgbr='cargo build --release'
+    alias cgr='cargo run'
+    alias cgrr='cargo run --release'
+    alias cga='cargo add'
+fi
+unset _dotfiles_root
 
 # Machine-specific overrides run last. Keep these files outside the repository.
 [ ! -r "$HOME/.bashrc.local" ] || . "$HOME/.bashrc.local"

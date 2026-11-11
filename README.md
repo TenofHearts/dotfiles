@@ -137,7 +137,7 @@ Keep services, drivers and system components under the distro package manager. T
 ## Machine-specific settings
 
 - `~/.bashrc.local` and `~/.zshrc.local` load last. Put proxy settings, coursework paths, CUDA setup and other workstation settings here. No proxy is enabled by default.
-- `~/.zprofile.local` loads early in Zsh. Use it for `TMUX_AUTOSTART=0`, since tmux starts before the final hook.
+- `~/.bash_profile.local` and `~/.zprofile.local` load early in Bash and Zsh, respectively. Use it for `TMUX_AUTOSTART=0`, since tmux starts before the final hook.
 - Existing Miniconda, rbenv, fnm and Cargo integrations load when available. Activated environments can change tool precedence.
 - Zsh plugins load from `~/.zsh`, Homebrew, or common distro package locations. Both shells initialize zoxide with `j` as the jump command when available.
 - Select a Nerd Font for prompt/editor icons, or disable Neovim icons with `vim.g.have_nerd_font = false`.
@@ -257,7 +257,7 @@ Runs installer tests in temporary home directories and software safety tests wit
 
 ### Bash
 
-[`config/bash/.bashrc`](config/bash/.bashrc) provides a familiar shell for everyday command-line work and development. It builds on familiar Bash defaults, keeping established shell behavior while making development tools easier to access. The guiding principle is practical convenience through straightforward startup configuration. Use `~/.bashrc.local` for workstation-specific paths and settings.
+[`config/bash/.bashrc`](config/bash/.bashrc) provides a familiar shell for everyday command-line work and development. It builds on familiar Bash defaults, keeping established shell behavior while making development tools easier to access. The guiding principle is practical convenience through straightforward startup configuration. It matches Zsh’s prompt, tmux autostart, Emacs editing, shared history, `cx` and Git shortcuts, UV and Cargo helpers, zoxide jumps, and optional welcome message using Bash-compatible setup. Bash history is kept separately in `~/.bash_history`. Use `~/.bashrc.local` for workstation-specific paths and settings.
 
 ### Zsh
 
@@ -265,7 +265,7 @@ Runs installer tests in temporary home directories and software safety tests wit
 
 ### tmux
 
-Interactive Zsh terminals automatically attach to a persistent `main` session before loading the rest of the shell configuration. After detaching or exiting tmux, the outer shell finishes loading normally. This skips terminals already inside tmux and VS Code terminals; set `TMUX_AUTOSTART=0` to disable it.
+Interactive Bash and Zsh terminals automatically attach to a persistent `main` session before loading the rest of the shell configuration. After detaching or exiting tmux, the outer shell finishes loading normally. This skips terminals already inside tmux and VS Code terminals; set `TMUX_AUTOSTART=0` to disable it.
 
 For machine-specific settings, create `~/.zprofile.local` (kept outside this repository):
 
@@ -273,7 +273,7 @@ For machine-specific settings, create `~/.zprofile.local` (kept outside this rep
 export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1 to enable.
 ```
 
-`.zshrc` sources this file before the tmux check, including in non-login shells. Keep it limited to environment settings, since it also runs for shells inside tmux. Without a setting, tmux autostart defaults to enabled.
+`.zshrc` sources this file before the tmux check, including in non-login shells. For Bash, put the same setting in `~/.bash_profile.local`; `.bashrc` loads it before its tmux check. Keep it limited to environment settings, since it also runs for shells inside tmux. Without a setting, tmux autostart defaults to enabled.
 
 [`config/tmux/.tmux.conf`](config/tmux/.tmux.conf) provides persistent window, pane, and resize modes with Vim-style navigation, colored status badges, and Ctrl+h help in a scrollable popup. New windows and splits preserve the current directory. Alt navigation remains available to the desktop window manager, including GlazeWM. The configuration uses tmux's built-in key tables and pickers without a plugin framework; it requires tmux 3.2 or newer and `less`.
 
