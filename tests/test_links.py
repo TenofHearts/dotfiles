@@ -43,7 +43,7 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, True)
         self.assertEqual(list(self.home.iterdir()), [])
 
-    def test_codex_only_installer_initializes_its_submodule(self):
+    def test_ai_only_installer_initializes_its_submodule(self):
         bin_dir = self.home / "bin"
         bin_dir.mkdir()
         log = self.home / "git-args"
@@ -52,15 +52,36 @@ class LinkTests(unittest.TestCase):
         fake_git.chmod(0o755)
         env = {**os.environ, "PATH": str(bin_dir) + os.pathsep + os.environ["PATH"],
                "DOTFILES_TEST_GIT_LOG": str(log)}
-        for option in (["--only", "codex"], ["--only=codex"]):
-            with self.subTest(option=option):
-                subprocess.run(["bash", str(links.ROOT / "install.sh"), *option,
-                                "--home", str(self.home)], env=env, check=True, capture_output=True)
-                self.assertEqual(log.read_text().splitlines(),
-                                 ["-C", str(links.ROOT), "submodule", "update", "--init",
-                                  "--recursive", "--", "config/ai"])
-        self.assertTrue((self.home / ".codex/dotfiles.config.toml").is_symlink())
+        for app, destination in (
+            ("codex", ".codex/dotfiles.config.toml"),
+            ("opencode", ".config/opencode/dotfiles.config.json"),
+        ):
+            for option in (["--only", app], ["--only=" + app]):
+                with self.subTest(option=option):
+                    subprocess.run(["bash", str(links.ROOT / "install.sh"), *option,
+                                    "--home", str(self.home)], env=env, check=True, capture_output=True)
+                    self.assertEqual(log.read_text().splitlines(),
+                                     ["-C", str(links.ROOT), "submodule", "update", "--init",
+                                      "--recursive", "--", "config/ai"])
+                    self.assertTrue((self.home / destination).is_symlink())
         self.assertFalse((self.home / ".bashrc").exists())
+
+    def test_opencode_preserves_local_settings_and_key(self):
+        config = self.home / ".config/opencode"
+        config.mkdir(parents=True)
+        local = config / "opencode.json"
+        local.write_text('{"model": "local/model"}\n')
+        key = config / "thirdparty.key"
+        key.write_text("local credentials placeholder\n")
+        key.chmod(0o600)
+        links.install(self.home, False, only="opencode")
+        self.assertEqual(links.status(self.home, only="opencode"), 0)
+        self.assertTrue((config / "cli.json").is_symlink())
+        self.assertTrue((config / "personal-instructions.md").is_symlink())
+        self.assertEqual(local.read_text(), '{"model": "local/model"}\n')
+        self.assertEqual(key.read_text(), "local credentials placeholder\n")
+        self.assertEqual(key.stat().st_mode & 0o777, 0o600)
+        self.assertFalse((self.home / ".codex").exists())
 
     def test_codex_profile_preserves_machine_config_and_state(self):
         codex_home = self.home / ".codex"

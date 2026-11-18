@@ -137,6 +137,9 @@ alias cls='clear'
 # Shared Codex preferences; ~/.codex/config.toml stays machine-local.
 alias cx='codex --profile dotfiles'
 
+# Apply shared OpenCode settings to a private server for this invocation.
+alias oc='OPENCODE_CONFIG_CONTENT="$(cat ~/.config/opencode/dotfiles.config.json)" opencode --standalone'
+
 # some aliases added by me
 alias ga='git add'
 alias gc='git commit'

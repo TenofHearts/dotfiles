@@ -2,7 +2,7 @@
 
 Personal shell, editor, tmux and prompt configuration for Linux. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
 
-Software management is optional and independent of configuration installation. One TOML manifest selects applications; small apt, dnf, pacman and Homebrew adapters handle package operations. Codex, Neovim and tmux configurations are pinned Git submodules.
+Software management is optional and independent of configuration installation. One TOML manifest selects applications; small apt, dnf, pacman and Homebrew adapters handle package operations. AI agent, Neovim and tmux configurations are pinned Git submodules.
 
 ## Quick start
 
@@ -183,6 +183,9 @@ The linker uses fixed destinations under the selected home and does not consult 
 | `config/vim/.vimrc` | `~/.vimrc` |
 | `config/tmux/.tmux.conf` | `~/.tmux.conf` |
 | `config/ai/codex/dotfiles.config.toml` | `~/.codex/dotfiles.config.toml` |
+| `config/ai/opencode/dotfiles.config.json` | `~/.config/opencode/dotfiles.config.json` |
+| `config/ai/opencode/personal-instructions.md` | `~/.config/opencode/personal-instructions.md` |
+| `config/ai/opencode/cli.json` | `~/.config/opencode/cli.json` |
 | `config/nvim/` | `~/.config/nvim` |
 | `config/oh-my-posh/theme.omp.json` | `~/.config/oh-my-posh/theme.omp.json` |
 | `config/cowsay/stegosaurus_and_cat.cow` | `~/.config/cowsay/stegosaurus_and_cat.cow` |
@@ -196,6 +199,7 @@ The linker uses fixed destinations under the selected home and does not consult 
 ./install.sh --dry-run          # Preview link changes without writing files
 ./install.sh --force            # Delete conflicting configurations; no backups
 ./install.sh --only codex       # Install only the shared Codex profile
+./install.sh --only opencode    # Install shared OpenCode configuration
 ./install.sh --home /tmp/demo-home  # Install into an alternate home
 ```
 
@@ -279,7 +283,11 @@ export TMUX_AUTOSTART=0  # Disable automatic tmux startup on this machine; use 1
 
 ### AI agents
 
-[`config/ai/`](config/ai/) contains shared AI agent configuration from [TenofHearts/ai-config](https://github.com/TenofHearts/ai-config), organized by agent. Its [`codex/`](config/ai/codex/) directory provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. It is maintained in a separate Git submodule. Bash and Zsh load the profile through the `codex` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
+[`config/ai/`](config/ai/) contains shared AI agent configuration from [TenofHearts/ai-config](https://github.com/TenofHearts/ai-config), organized by agent. Its [`codex/`](config/ai/codex/) directory provides shared Codex CLI preferences with automatic approval review, Vim input mode, and a status bar showing model, project, context, and usage limits. It is maintained in a separate Git submodule. Bash and Zsh load the profile through the `cx` alias. Machine-specific settings remain in `~/.codex/config.toml`, with shared profile values taking precedence.
+
+Install OpenCode separately, then run `./install.sh --only opencode`. This links the shared server overlay, personal instructions, and terminal client settings from the same AI submodule used by [dotfiles-apple](https://github.com/TenofHearts/dotfiles-apple). Existing conflicting files are skipped; preview replacements with `--dry-run --force`.
+
+Store your gateway API key in `~/.config/opencode/thirdparty.key` and run `chmod 600 ~/.config/opencode/thirdparty.key`. Keep the key local. Reload Bash or Zsh and run `oc`; additional arguments work normally. The alias supplies the shared overlay through `OPENCODE_CONFIG_CONTENT` and starts a private server with `--standalone`. Matching overlay settings take precedence over normal user and project settings; unrelated settings are preserved. The linked `cli.json` also applies when launching plain `opencode`. See [OpenCode setup](config/ai/README.md#opencode-setup) for details.
 
 ### Vim
 
@@ -310,4 +318,4 @@ git pull
 git submodule update --init --recursive
 ```
 
-The parent repository pins specific Codex, Neovim, and tmux commits; updating to a different submodule revision is a deliberate change.
+The parent repository pins specific AI agent, Neovim, and tmux commits; updating to a different submodule revision is a deliberate change.
