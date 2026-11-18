@@ -23,7 +23,7 @@ selected and missing, then install configuration links (skip conflicts).
 --dry-run        Preview without downloads, package transactions, or link changes.
 
 Use ./scripts/software.py --help for software commands. Runtime setup is separate:
-./scripts/toolchains.sh [all|node|rust] [--dry-run]
+./runtimes/toolchains.sh [all|node|rust] [--dry-run]
 HELP
 }
 
@@ -43,10 +43,7 @@ while (($#)); do
         *) software_args+=("$1"); shift ;;
     esac
 done
-if [[ "$(uname -s)" != Linux ]]; then
-    echo 'This bootstrap supports Linux (including WSL2).' >&2
-    exit 1
-fi
+"$ROOT/platform/wsl-ubuntu/check.sh"
 if [[ "$action" == install ]]; then software_args+=(--bootstrap-brew); fi
 python3 "$ROOT/scripts/software.py" "$action" "${software_args[@]}"
 if (( links )); then

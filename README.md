@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal shell, editor, tmux and prompt configuration for Linux. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
+Personal shell, editor, tmux and prompt configuration for Linux. The currently supported platform is Ubuntu under WSL2; the repository is organized so additional Linux platforms can be added later. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
 
 Software management is optional and independent of configuration installation. One TOML manifest selects applications; small apt, dnf, pacman and Homebrew adapters handle package operations. AI agent, Neovim and tmux configurations are pinned Git submodules.
 
@@ -25,8 +25,8 @@ For software management, use **Python 3.11+**, or Python 3.8+ with `tomli` insta
 ./bootstrap.sh --dry-run                     # Preview software and configuration setup
 ./bootstrap.sh                              # Install missing software, then link configuration
 ./bootstrap.sh --software-only --group core  # Install only core software
-./scripts/toolchains.sh --dry-run            # Separate Node LTS/Rust stable setup
-./scripts/toolchains.sh
+./runtimes/toolchains.sh --dry-run           # Separate Node LTS/Rust stable setup
+./runtimes/toolchains.sh
 ```
 
 Review `software/manifest.toml` first. Native packages are the default. Neovim, Oh My Posh, uv, fnm and rustup explicitly use Homebrew; zoxide also retains its existing Homebrew provider. The optional `fun` group contains fortune/cowsay/lolcat. Bootstrap provisions Homebrew only if a selected application requires it and it is missing. Configuration installation alone never provisions it.
@@ -102,7 +102,7 @@ The old hand-maintained Brewfile has been replaced by this manifest. Export a ge
 
 ## Bootstrap and runtime setup
 
-`bootstrap.sh` wraps software installation and the independent dotfile installer:
+`bootstrap.sh` validates the supported WSL Ubuntu platform, then wraps software installation and the independent dotfile installer:
 
 ```sh
 ./bootstrap.sh --dry-run
@@ -112,16 +112,16 @@ The old hand-maintained Brewfile has been replaced by this manifest. Export a ge
 ./bootstrap.sh --skip-prerequisites   # Supply Homebrew prerequisites yourself
 ```
 
-Native detection uses `ID` and `ID_LIKE` from `/etc/os-release`, not whichever package-manager executable happens to be on PATH. `--native-manager apt|dnf|pacman` overrides it. Unknown distro families require an explicit native adapter choice or an all-Homebrew selection. Immutable systems and special packaging environments may need manual setup.
+The bootstrap entry point currently accepts only Ubuntu running under WSL2. Native package detection still uses `ID` and `ID_LIKE` from `/etc/os-release`, and the software adapters retain the package-family boundary needed for future Linux platforms. `--native-manager apt|dnf|pacman` remains available for software-manager tests and future platform support.
 
 Homebrew provisioning is isolated in `software/bootstrap.py`. It uses the same catalog/adapters to install native build prerequisites, downloads the [official installer](https://github.com/Homebrew/install), and runs it as the normal user. Existing Homebrew skips this step. `--skip-prerequisites` also permits provisioning on systems outside the native adapters if you supply the prerequisites and select only Homebrew applications. Direct `software.py install` does not provision Homebrew unless passed `--bootstrap-brew`.
 
 Application installation does not initialize language runtimes. Run separately:
 
 ```sh
-./scripts/toolchains.sh node   # Install current Node LTS through fnm
-./scripts/toolchains.sh rust   # Install stable Rust plus editor components
-./scripts/toolchains.sh        # Both
+./runtimes/toolchains.sh node   # Install current Node LTS through fnm
+./runtimes/toolchains.sh rust   # Install stable Rust plus editor components
+./runtimes/toolchains.sh        # Both
 ```
 
 Existing Node/Rust defaults are preserved where the managers support this; Rust defaults to stable only when no default exists. This replaces the previous automatic runtime setup in bootstrap. `--update node` is no longer a package-manager alias: use fnm directly for a non-LTS Node release. Global npm packages are not copied between Node versions.
@@ -165,11 +165,13 @@ software/
   manager.py             # Detection, selection, status and transaction planning
   bootstrap.py           # Optional Homebrew provisioning
   adapters/              # apt, dnf, pacman, Homebrew
+platform/
+  wsl-ubuntu/            # Current supported platform guard
+runtimes/
+  toolchains.sh          # Explicit Node/Rust runtime setup
 scripts/
   software.py            # Software CLI
-  toolchains.sh          # Explicit Node/Rust runtime setup
   links.py               # Install, inspect, restore configuration links
-  set_proxy.sh           # Opt-in proxy helper
 config/                  # Shell/editor/prompt configuration and Git submodules
 tests/                   # File-preservation and package-transaction safety tests
 ```
@@ -232,22 +234,6 @@ python3 scripts/links.py restore "$HOME/.local/state/dotfiles/backups/<timestamp
 ```
 
 Replace `<timestamp>` with the actual backup directory. Restore moves backed-up originals back into place, so that backup is consumed. Only entries changed by that installation are included. New installations cannot be undone using this command because they do not create backups. This also applies to `--force`.
-
-### `scripts/set_proxy.sh`
-
-Source this script from the shell where you want its exports to persist:
-
-```sh
-source scripts/set_proxy.sh
-```
-
-Reads the nameserver address from `/etc/resolv.conf` and exports uppercase `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` using HTTP port `7897`. This assumes the nameserver address also reaches a proxy host, as in some WSL setups; it does not discover or start a proxy. It expects a single nameserver entry. This helper is opt-in and is never sourced automatically. Align uppercase and lowercase variables if clients use different capitalization.
-
-To clear both sets for the current session:
-
-```sh
-unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
-```
 
 ### Tests
 

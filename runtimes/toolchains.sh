@@ -7,7 +7,7 @@ for arg in "$@"; do
     case "$arg" in
         --dry-run) dry_run=1 ;;
         all|node|rust) selection="$arg" ;;
-        -h|--help) echo 'Usage: ./scripts/toolchains.sh [all|node|rust] [--dry-run]'; exit 0 ;;
+        -h|--help) echo 'Usage: ./runtimes/toolchains.sh [all|node|rust] [--dry-run]'; exit 0 ;;
         *) echo "Unknown argument: $arg" >&2; exit 2 ;;
     esac
 done

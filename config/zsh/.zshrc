@@ -186,9 +186,6 @@ fi
 
 # export PATH="$USER_HOME/.elan/bin:$PATH"
 
-# Source this helper so its exports affect the current shell.
-# alias sprox='source "$USER_HOME/dotfiles/scripts/set_proxy.sh"'
-
 # Display welcome message if fortune and cowsay are available
 if command -v fortune > /dev/null && command -v cowsay > /dev/null; then
 		# export COWPATH="$USER_HOME/.config/cowsay:$COWPATH"
