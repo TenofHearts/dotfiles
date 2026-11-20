@@ -32,8 +32,9 @@ hl.config({
         },
     },
     animations = {
-        enabled = false,
+        enabled = true,
     },
+    scrolling = { direction = "right", fullscreen_on_one_column = false },
     dwindle = {
         preserve_split = true,
     },
@@ -51,6 +52,12 @@ hl.config({
         movefocus_cycles_fullscreen = true,
     },
 })
+
+hl.gesture({ fingers = 3, direction = "vertical", action = "workspace" })
+hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
+
+hl.animation({ leaf = "global", enabled = false })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "default", style = "slidevert" })
 
 -- Numbered workspaces are addressable on demand. Empty ones disappear when
 -- left, so each output's bar shows occupied workspaces and its visible one.
