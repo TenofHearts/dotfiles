@@ -22,6 +22,10 @@ hl.bind("ALT + k", dsp.focus({ direction = directions.k }), universal)
 for i = 1, 9 do
     hl.bind("ALT + " .. i, dsp.focus({ workspace = tostring(i) }), universal)
 end
+-- Replace the CachyOS cycle binding before opening Noctalia's switcher.
+hl.unbind("ALT + Tab")
+hl.bind("ALT + Tab", dsp.exec_cmd("noctalia msg window-switcher hold workspace"), universal)
+hl.bind("ALT + SHIFT + Tab", dsp.exec_cmd("noctalia msg window-switcher hold workspace reverse"), universal)
 hl.bind("ALT + q", dsp.window.close(), universal)
 hl.bind("ALT + space", dsp.exec_cmd("noctalia msg panel-toggle launcher"))
 hl.bind("ALT + SHIFT + s", dsp.exec_cmd("shotori gui"), universal)

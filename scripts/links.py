@@ -8,7 +8,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_APPS = {"hyprland", "waybar", "noctalia", "rime", "shotori", "solaar"}
+DESKTOP_APPS = {"ghostty", "hyprland", "kitty", "waybar", "noctalia", "rime", "shotori", "solaar"}
 FILES = {
     ".bashrc": "config/bash/.bashrc",
     ".zshrc": "config/zsh/.zshrc",
@@ -19,6 +19,8 @@ FILES = {
     ".config/opencode/cli.json": "config/ai/opencode/cli.json",
     ".codex/dotfiles.config.toml": "config/ai/codex/dotfiles.config.toml",
     ".config/nvim": "config/nvim",
+    ".config/ghostty/config.ghostty": "config/ghostty/config.ghostty",
+    ".config/kitty/kitty.conf": "config/kitty/kitty.conf",
     ".config/hypr": "config/hyprland",
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
