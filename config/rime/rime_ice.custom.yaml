@@ -1,4 +1,9 @@
 patch:
+  # Fcitx5-rime 5.1.16 takes the Chinese label from the first name character.
+  schema/name: "中 · 雾凇拼音"
+  switches/@0/states: [中, A]
+  switches/@0/abbrev: [中, A]
+
   # Start new input sessions in English; existing sessions retain their mode.
   switches/@0/reset: 1
 

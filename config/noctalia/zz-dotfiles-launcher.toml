@@ -1,0 +1,14 @@
+[shell.launcher]
+layout = "simple"
+categories = false
+app_grid = false
+compact = true
+show_icons = true
+show_app_origin_indicator = false
+provider_prefix = "/"
+
+[shell.panel]
+launcher_placement = "floating"
+launcher_position = "center"
+open_near_click_launcher = false
+transparency_mode = "glass"

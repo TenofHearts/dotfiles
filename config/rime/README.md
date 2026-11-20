@@ -1,7 +1,7 @@
 # Rime Ice on Fcitx5
 
-The Linux profile uses the same Rime Ice revision and engine patches as the macOS
-profile. It requires Git, Python 3, Fcitx5 with its Rime addon, librime with the Lua
+The Linux profile uses the macOS Rime Ice revision with Linux-specific mode
+defaults and labels. It requires Git, Python 3, Fcitx5 with its Rime addon, librime with the Lua
 plugin, and `rime_deployer`. From the repository root:
 
 ```sh
@@ -36,6 +36,11 @@ in English. Either Shift key switches between English and Chinese; pressing Shif
 commits the raw code. Classic UI uses Noto Sans CJK SC and the system light/dark
 preference; inline preedit also depends on the application.
 
-The engine patches are verbatim macOS settings. In particular, the punctuation
+Mode labels are `A` (English) and `中` (Chinese). Fcitx5-rime 5.1.16 uses the
+schema's ASCII switch label only with `LatinModeNameFromSchema=True`. Its Chinese
+label is the first character of `schema/name`, so the displayed schema name is
+prefixed with `中`; `schema/abbrev` is not used by this addon version.
+
+The punctuation patch follows the macOS settings. In particular, the punctuation
 patch replaces the schema's punctuation table: its compiled configuration has
 six ASCII full-shape mappings and no explicit half-shape or symbol table.

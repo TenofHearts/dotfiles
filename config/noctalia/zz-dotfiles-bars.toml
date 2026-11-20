@@ -1,6 +1,12 @@
 # Overlay the informational Waybar without shifting tiled windows on reveal.
 [theme]
+mode = "auto"
 shell_mode = "follow"
+
+[location]
+custom_schedule = true
+sunrise = "07:00"
+sunset = "18:00"
 
 [bar.default]
 position = "top"

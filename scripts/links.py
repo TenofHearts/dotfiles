@@ -22,6 +22,7 @@ FILES = {
     ".config/hypr": "config/hyprland",
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
+    ".config/noctalia/zz-dotfiles-launcher.toml": "config/noctalia/zz-dotfiles-launcher.toml",
     ".config/shotori/settings.toml": "config/shotori/settings.toml",
     ".config/solaar/rules.yaml": "config/solaar/rules.yaml",
     ".config/autostart/solaar.desktop": "config/solaar/solaar.desktop",
