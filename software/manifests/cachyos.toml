@@ -1,0 +1,18 @@
+# Native CachyOS: repository packages use pacman; AUR exceptions are explicit.
+[defaults]
+provider = "native"
+groups = ["core", "editors", "development"]
+
+[groups]
+core = ["git", "zsh", "zsh-autosuggestions", "zsh-syntax-highlighting", "tmux", "less", "ripgrep", "fd", "zoxide", "htop", "rsync", "wget", "unzip", "zip"]
+editors = ["vim", "neovim", "oh-my-posh"]
+development = ["python", "uv", "fnm", "rustup", "cmake", "pkgconf", "ccache"]
+desktop = ["hyprland", "waybar", "noctalia", "jq"]
+fun = ["cowsay", "fortune", "lolcat"]
+
+[software.oh-my-posh]
+provider = "aur"
+
+[software.neovim]
+command = "nvim"
+minimum_version = "0.12"

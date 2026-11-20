@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from software.adapters.base import Runner
 from software.bootstrap import provision_brew
-from software.manager import (Catalog, adapters, display, inspect, native_manager,
+from software.manager import (Catalog, adapters, display, host_profile, inspect, native_manager,
                               read_toml, transaction_commands, version_problems)
 
 
@@ -21,13 +21,15 @@ def main():
     parser.add_argument("--group", action="append", default=[], help="Select a group; repeatable")
     parser.add_argument("--provider", choices=("native", "brew"), help="Override manifest providers")
     parser.add_argument("--native-manager", choices=("apt", "dnf", "pacman"), help="Override /etc/os-release detection")
+    parser.add_argument("--profile", choices=("wsl-ubuntu", "cachyos"), help="Select a manifest explicitly; default: detect host")
     parser.add_argument("--dry-run", action="store_true", help="Print transactions without executing them")
     parser.add_argument("--bootstrap-brew", action="store_true", help="Install Homebrew if selected and missing (install/plan only)")
     parser.add_argument("--skip-prerequisites", action="store_true", help="Manage Homebrew prerequisites yourself")
     args = parser.parse_args()
     if args.bootstrap_brew and args.action not in ("install", "plan"):
         parser.error("--bootstrap-brew applies only to install and plan")
-    catalog = Catalog(read_toml(ROOT / "software/manifest.toml"), read_toml(ROOT / "software/packages.toml"))
+    profile = args.profile or host_profile()
+    catalog = Catalog(read_toml(ROOT / "software/manifests" / (profile + ".toml")), read_toml(ROOT / "software/packages.toml"))
     native = args.native_manager or native_manager()
     selection = catalog.select(args.names, args.group, args.provider, native)
     if args.action == "export-brewfile":

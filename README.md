@@ -1,8 +1,8 @@
 # Dotfiles
 
-Personal shell, editor, tmux, prompt and optional Hyprland desktop configuration for Linux. The currently supported shell platform is Ubuntu under WSL2; native Wayland desktops can also install the Hyprland and Waybar configuration links. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
+Personal shell, editor, tmux and prompt configuration for Ubuntu under WSL and native CachyOS, with optional Hyprland desktop configuration. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
 
-Software management is optional and independent of configuration installation. One TOML manifest selects applications; small apt, dnf, pacman and Homebrew adapters handle package operations. AI agent, Neovim and tmux configurations are pinned Git submodules.
+Software management is optional and independent of configuration installation. A host-specific TOML manifest selects applications from a shared package catalog. AI agent, Neovim and tmux configurations are pinned Git submodules.
 
 ## Quick start
 
@@ -29,7 +29,10 @@ For software management, use **Python 3.11+**, or Python 3.8+ with `tomli` insta
 ./runtimes/toolchains.sh
 ```
 
-Review `software/manifest.toml` first. Native packages are the default. Neovim, Oh My Posh, uv, fnm and rustup explicitly use Homebrew; zoxide also retains its existing Homebrew provider. The optional `fun` group contains fortune/cowsay/lolcat. Bootstrap provisions Homebrew only if a selected application requires it and it is missing. Configuration installation alone never provisions it.
+Review the manifest for your host:
+
+- [Ubuntu under WSL](software/manifests/wsl-ubuntu.toml): apt by default, with the existing Homebrew choices for zoxide, Neovim, Oh My Posh, uv, fnm and rustup. There is no `desktop` group, including when WSLg is running.
+- [Native CachyOS](software/manifests/cachyos.toml): pacman for repository packages, `paru` for the explicit AUR package `oh-my-posh-bin`. The default selection uses no Homebrew. Preview the optional Hyprland, Waybar, Noctalia and jq selection with `./scripts/software.py plan --group desktop`. Desktop configuration links remain separate and opt-in.
 
 **Migrating an existing Homebrew workstation:** provider conflicts are reported and block transactions. For example, if fd is already installed through Homebrew, add `[software.fd]` with `provider = "brew"` to retain it. To migrate providers, remove the old provider's packages yourself, then install through the chosen provider. This tool never automatically removes packages or rewrites your manifest. It detects duplicates between the host's native package database and Homebrew, not arbitrary manually installed binaries.
 
@@ -37,7 +40,7 @@ Existing clones can adopt the HTTPS submodule URLs with `git submodule sync --re
 
 ## Software manifest
 
-Edit desired applications and providers in [`software/manifest.toml`](software/manifest.toml):
+Edit desired applications and providers in the appropriate file under [`software/manifests/`](software/manifests/):
 
 ```toml
 [defaults]
@@ -102,7 +105,7 @@ The old hand-maintained Brewfile has been replaced by this manifest. Export a ge
 
 ## Bootstrap and runtime setup
 
-`bootstrap.sh` validates the supported WSL Ubuntu platform, then wraps software installation and the independent dotfile installer:
+`bootstrap.sh` uses the same host detection as the software CLI, then wraps software installation and the independent dotfile installer:
 
 ```sh
 ./bootstrap.sh --dry-run
@@ -112,7 +115,7 @@ The old hand-maintained Brewfile has been replaced by this manifest. Export a ge
 ./bootstrap.sh --skip-prerequisites   # Supply Homebrew prerequisites yourself
 ```
 
-The bootstrap entry point currently accepts only Ubuntu running under WSL2. Native package detection still uses `ID` and `ID_LIKE` from `/etc/os-release`, and the software adapters retain the package-family boundary needed for future Linux platforms. `--native-manager apt|dnf|pacman` remains available for software-manager tests and future platform support.
+Automatic selection checks the WSL kernel marker and the distribution's `ID`; other host combinations have no automatic manifest. `--native-manager` changes only the package adapter, not the manifest. To preview WSL package selection on CachyOS, use `./scripts/software.py plan --profile wsl-ubuntu --native-manager apt`. Such a preview still queries local package databases. AUR builds require an already installed `paru`, run as the normal user; update CachyOS and AUR packages together separately with `paru -Syu`.
 
 Homebrew provisioning is isolated in `software/bootstrap.py`. It uses the same catalog/adapters to install native build prerequisites, downloads the [official installer](https://github.com/Homebrew/install), and runs it as the normal user. Existing Homebrew skips this step. `--skip-prerequisites` also permits provisioning on systems outside the native adapters if you supply the prerequisites and select only Homebrew applications. Direct `software.py install` does not provision Homebrew unless passed `--bootstrap-brew`.
 
@@ -160,13 +163,13 @@ This does not change your login shell. Vim plugins, Nerd Fonts, Miniconda, CUDA/
 bootstrap.sh             # Optional software setup, then configuration links
 install.sh               # Configuration installer
 software/
-  manifest.toml          # Application groups and provider choices
+  manifests/             # wsl-ubuntu.toml and cachyos.toml
   packages.toml          # Package-name mappings, including build prerequisites
   manager.py             # Detection, selection, status and transaction planning
   bootstrap.py           # Optional Homebrew provisioning
-  adapters/              # apt, dnf, pacman, Homebrew
+  adapters/              # apt, dnf, pacman, paru (AUR), Homebrew
 platform/
-  wsl-ubuntu/            # Current supported platform guard
+  wsl-ubuntu/            # Standalone WSL Ubuntu platform check
 runtimes/
   toolchains.sh          # Explicit Node/Rust runtime setup
 scripts/

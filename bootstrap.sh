@@ -15,7 +15,7 @@ Usage: ./bootstrap.sh [--dry-run] [--software-only] [--force]
                       [--native-manager apt|dnf|pacman] [--skip-prerequisites]
        ./bootstrap.sh --update [APP ...] [--dry-run] [--group GROUP]
 
-Install software from software/manifest.toml, provisioning Homebrew only when
+Install software from the detected host's software/manifests/*.toml, provisioning Homebrew only when
 selected and missing, then install configuration links (skip conflicts).
 --software-only  Skip configuration links.
 --force          Delete conflicting configurations when linking (no backups).
@@ -43,7 +43,6 @@ while (($#)); do
         *) software_args+=("$1"); shift ;;
     esac
 done
-"$ROOT/platform/wsl-ubuntu/check.sh"
 if [[ "$action" == install ]]; then software_args+=(--bootstrap-brew); fi
 python3 "$ROOT/scripts/software.py" "$action" "${software_args[@]}"
 if (( links )); then

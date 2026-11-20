@@ -7,7 +7,7 @@ import shlex
 
 from .adapters import ADAPTERS, find_brew
 
-PROVIDERS = ("native", "brew")
+PROVIDERS = ("native", "brew", "aur")
 NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._@/-]*$")
 
 
@@ -24,13 +24,28 @@ def read_toml(path):
         return tomllib.load(stream)
 
 
-def native_manager(path=Path("/etc/os-release")):
+def os_release(path):
     values = {}
     for line in path.read_text().splitlines():
         if "=" in line and not line.startswith("#"):
             key, value = line.split("=", 1)
             parts = shlex.split(value)
             values[key] = " ".join(parts)
+    return values
+
+
+def host_profile(path=Path("/etc/os-release"), kernel=Path("/proc/sys/kernel/osrelease")):
+    distro = os_release(path).get("ID")
+    wsl = re.search("microsoft|wsl", kernel.read_text(), re.I)
+    if wsl and distro == "ubuntu":
+        return "wsl-ubuntu"
+    if not wsl and distro == "cachyos":
+        return "cachyos"
+    raise ValueError("No software manifest for this host; expected Ubuntu under WSL or native CachyOS.")
+
+
+def native_manager(path=Path("/etc/os-release")):
+    values = os_release(path)
     identities = [values.get("ID", "")] + values.get("ID_LIKE", "").split()
     for identity in identities:
         if identity in ("debian", "ubuntu", "linuxmint", "pop"):
@@ -55,7 +70,7 @@ class Catalog:
                 raise ValueError("Invalid minimum_version for " + name)
             if minimum and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", settings.get("command", name)):
                 raise ValueError("Invalid version command for " + name)
-        if self.default not in PROVIDERS:
+        if self.default not in ("native", "brew"):
             raise ValueError("Default provider must be native or brew")
 
     def select(self, names=(), groups=(), provider=None, native=None):
@@ -73,7 +88,9 @@ class Catalog:
             chosen = provider or self.settings.get(name, {}).get("provider", self.default)
             if chosen not in PROVIDERS:
                 raise ValueError("Unknown provider for " + name + ": " + str(chosen))
-            manager = native if chosen == "native" else "brew"
+            if chosen == "aur" and native != "pacman":
+                raise ValueError("AUR packages require a pacman host: " + name)
+            manager = native if chosen == "native" else chosen
             if not manager:
                 raise ValueError("Unknown native package manager. Use --native-manager or --provider brew.")
             result.append((name, manager, self.resolve(name, manager)))
@@ -81,7 +98,7 @@ class Catalog:
 
     def resolve(self, name, manager):
         mapping = self.packages[name]
-        packages = mapping.get(manager, mapping.get("default"))
+        packages = mapping.get(manager, mapping.get("default") if manager != "aur" else None)
         if not isinstance(packages, list) or not packages:
             raise ValueError("No {} mapping for {}. Add an explicit mapping or select another provider."
                              .format(manager, name))
@@ -91,7 +108,7 @@ class Catalog:
 
     def brewfile(self, selection):
         packages = dict.fromkeys(p for _, manager, values in selection if manager == "brew" for p in values)
-        return "# Generated from software/manifest.toml and software/packages.toml.\n" + "".join(
+        return "# Generated from the selected software manifest and software/packages.toml.\n" + "".join(
             "brew " + json.dumps(package) + "\n" for package in packages)
 
 
@@ -99,6 +116,8 @@ def adapters(runner, native):
     result = {"brew": ADAPTERS["brew"](runner, find_brew())}
     if native:
         result[native] = ADAPTERS[native](runner)
+    if native == "pacman":
+        result["aur"] = ADAPTERS["aur"](runner)
     return result
 
 
@@ -109,7 +128,7 @@ def inspect(catalog, selection, backends, native):
     def installed(manager, package):
         key = (manager, package)
         if key not in cache:
-            backend = backends[manager]
+            backend = backends["pacman" if manager == "aur" else manager]
             cache[key] = backend.available() and backend.installed(package)
         return cache[key]
 
@@ -121,6 +140,8 @@ def inspect(catalog, selection, backends, native):
         if other and backends[other].available():
             mapping = catalog.packages[name]
             other_packages = mapping.get(other, mapping.get("default", []))
+            if other == "pacman":
+                other_packages = other_packages + mapping.get("aur", [])
             conflicts = [p for p in other_packages if installed(other, p)]
         rows.append(dict(name=name, manager=manager, packages=packages,
                          missing=missing, other=other, conflicts=conflicts))

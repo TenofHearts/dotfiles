@@ -1,6 +1,6 @@
 # WSL Ubuntu
 
-This is the platform currently supported by `bootstrap.sh`.
+`bootstrap.sh` selects `software/manifests/wsl-ubuntu.toml` on this platform. The CachyOS manifest is selected only on native CachyOS. Run `check.sh` for a standalone WSL Ubuntu check.
 
 The platform guard intentionally keeps environment detection separate from Linux distribution detection:
 

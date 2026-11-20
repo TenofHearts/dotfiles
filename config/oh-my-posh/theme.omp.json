@@ -138,6 +138,7 @@
                     "properties": {
                         "alpine": "",
                         "arch": "",
+                        "cachyos": "",
                         "cache_duration": "none",
                         "centos": "",
                         "debian": "",

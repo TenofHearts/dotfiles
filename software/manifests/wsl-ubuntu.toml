@@ -1,4 +1,4 @@
-# Desired software. Native is the default; exceptions explicitly use Homebrew.
+# Ubuntu under WSL: shell and development tools only.
 # Removing an entry never uninstalls it. Names here are stable application IDs.
 [defaults]
 provider = "native"

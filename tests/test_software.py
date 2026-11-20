@@ -9,15 +9,47 @@ from unittest.mock import patch
 
 from software.adapters import ADAPTERS
 from software.adapters.base import Adapter, Runner
-from software.manager import Catalog, inspect, native_manager, read_toml, transaction_commands, version_problems
+from software.manager import Catalog, host_profile, inspect, native_manager, read_toml, transaction_commands, version_problems
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class SoftwareTests(unittest.TestCase):
     def setUp(self):
-        self.catalog = Catalog(read_toml(ROOT / "software/manifest.toml"),
+        self.catalog = Catalog(read_toml(ROOT / "software/manifests/wsl-ubuntu.toml"),
                                read_toml(ROOT / "software/packages.toml"))
+
+    def test_wsl_never_auto_selects_desktop_manifest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            release, kernel = (Path(directory) / p for p in ("os-release", "osrelease"))
+            kernel.write_text("6.6.87.2-microsoft-standard-WSL2")
+            release.write_text('ID=ubuntu\n')
+            self.assertEqual(host_profile(release, kernel), "wsl-ubuntu")
+            with self.assertRaisesRegex(ValueError, "Unknown software group: desktop"):
+                self.catalog.select(groups=["desktop"], native="apt")
+            release.write_text('ID=cachyos\nID_LIKE=arch\n')
+            with self.assertRaisesRegex(ValueError, "No software manifest"):
+                host_profile(release, kernel)
+            kernel.write_text("6.18-cachyos")
+            self.assertEqual(host_profile(release, kernel), "cachyos")
+
+    def test_cachyos_uses_pacman_and_explicit_aur_packages(self):
+        catalog = Catalog(read_toml(ROOT / "software/manifests/cachyos.toml"),
+                          read_toml(ROOT / "software/packages.toml"))
+        selection = catalog.select(native="pacman")
+        self.assertEqual({manager for _, manager, _ in selection}, {"aur", "pacman"})
+        self.assertIn(("oh-my-posh", "aur", ["oh-my-posh-bin"]), selection)
+        desktop = catalog.select(groups=["desktop"], native="pacman")
+        self.assertTrue(all(manager == "pacman" for _, manager, _ in desktop))
+        self.assertFalse({row[0] for row in desktop} & {row[0] for row in selection})
+        runner = Runner(dry_run=True)
+        backends = {name: cls(runner) for name, cls in ADAPTERS.items()}
+        with patch.object(Adapter, "available", return_value=True), \
+             patch.object(ADAPTERS["pacman"], "installed", return_value=False), \
+             patch.object(ADAPTERS["brew"], "installed", return_value=False):
+            rows = inspect(catalog, catalog.select(["oh-my-posh"], native="pacman"), backends, "pacman")
+            self.assertEqual(transaction_commands(rows, "install", backends),
+                             [["paru", "-S", "--aur", "--needed", "oh-my-posh-bin"]])
 
     def test_detection_uses_os_identity_not_installed_executables(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -98,7 +130,7 @@ if 'install' in sys.argv:
                 executable.chmod(0o755)
             env = dict(os.environ, PATH=str(root), SOFTWARE_TEST_STATE=str(state), SOFTWARE_TEST_LOG=str(log))
             command = [sys.executable, str(ROOT / "scripts/software.py")]
-            args = ["git", "fd", "--provider", "native", "--native-manager", "apt"]
+            args = ["git", "fd", "--profile", "wsl-ubuntu", "--provider", "native", "--native-manager", "apt"]
             for action in ("plan", "install"):
                 preview = ["--dry-run"] if action == "install" else []
                 result = subprocess.run(command + [action] + args + preview, env=env,
