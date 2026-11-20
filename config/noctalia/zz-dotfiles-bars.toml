@@ -1,0 +1,64 @@
+# Overlay the informational Waybar without shifting tiled windows on reveal.
+[theme]
+shell_mode = "follow"
+
+[bar.default]
+position = "top"
+layer = "overlay"
+thickness = 35
+auto_hide = true
+smart_auto_hide = false
+show_on_workspace_switch = false
+reserve_space = true
+auto_hide_reserve_space = false
+margin_edge = 0
+margin_ends = 0
+margin_opposite_edge = 0
+background_opacity = 1.0
+color = "on_surface"
+concave_edge_corners = false
+radius = 0
+radius_top_left = 0
+radius_top_right = 0
+radius_bottom_left = 0
+radius_bottom_right = 0
+shadow = false
+widget_spacing = 12
+capsule = false
+hover_highlight = true
+capsule_padding = 5
+capsule_radius = 5
+start = ["session", "launcher", "temp", "sysmon_2", "sysmon_3", "network_rx", "network_tx"]
+center = ["workspaces"]
+end = ["notifications", "media", "tray", "volume", "network", "bluetooth", "battery", "date", "clock"]
+
+[widget.date]
+type = "clock"
+format = "{:%a, %b %e}"
+
+[widget.clock]
+format = "{:%H:%M}"
+
+[widget.media]
+peek = true
+
+[widget.tray]
+capsule = false
+drawer = true
+pinned = []
+hide_passive = false
+
+[widget.workspaces]
+style = "regular"
+capsule = false
+capsule_radius = 3
+pill_scale = 1.0
+active_pill_size = 1.0
+inactive_pill_size = 1.0
+focused_color = "primary"
+occupied_color = "surface"
+show_labels = true
+show_icons = false
+label_source = "id"
+hide_when_empty = true
+monitors = []

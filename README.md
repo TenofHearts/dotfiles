@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal shell, editor, tmux and prompt configuration for Linux. The currently supported platform is Ubuntu under WSL2; the repository is organized so additional Linux platforms can be added later. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
+Personal shell, editor, tmux, prompt and optional Hyprland desktop configuration for Linux. The currently supported shell platform is Ubuntu under WSL2; native Wayland desktops can also install the Hyprland and Waybar configuration links. Configuration lives in `config/`; installation links it into your home directory. Existing configurations are skipped by default. `--force` deletes conflicts without backups.
 
 Software management is optional and independent of configuration installation. One TOML manifest selects applications; small apt, dnf, pacman and Homebrew adapters handle package operations. AI agent, Neovim and tmux configurations are pinned Git submodules.
 
@@ -189,10 +189,20 @@ The linker uses fixed destinations under the selected home and does not consult 
 | `config/ai/opencode/personal-instructions.md` | `~/.config/opencode/personal-instructions.md` |
 | `config/ai/opencode/cli.json` | `~/.config/opencode/cli.json` |
 | `config/nvim/` | `~/.config/nvim` |
+| `config/hyprland/` | `~/.config/hypr` |
+| `config/waybar/` | `~/.config/waybar` |
 | `config/oh-my-posh/theme.omp.json` | `~/.config/oh-my-posh/theme.omp.json` |
 | `config/cowsay/stegosaurus_and_cat.cow` | `~/.config/cowsay/stegosaurus_and_cat.cow` |
 
 ## Configuration scripts
+
+### Native Hyprland desktop
+
+The desktop profiles are opt-in. Preview each with `./install.sh --only hyprland --dry-run` or `./install.sh --only waybar --dry-run`; omit `--dry-run` to link it. Existing configuration directories are skipped. To keep a distribution's launcher, monitor settings or app rules, merge the desired Lua modules into its existing profile. Neither profile installs software.
+
+The [shortcut guide](config/hyprland/help.html) covers the modal bindings for Hyprland 0.57.2. Waybar shows the mode and title on the left and volume, network, Bluetooth, battery and clock on the right. Like Noctalia, its center shows each output's occupied workspaces, plus its visible workspace and any urgent workspace even if empty.
+
+For a desktop already running Noctalia, `./install.sh --only noctalia` adds a bar-only override alongside its existing settings. Pair it with the Waybar link and launch `waybar -c ~/.config/waybar/with-noctalia.jsonc` instead of the standalone Waybar. Both bars share the top 35 logical pixels. Noctalia reserves the row and covers Waybar when revealed at the screen edge. Power and search come first on the left, followed by the CachyOS system monitors and network traffic. Only workspace badges occupy the center. Media and system controls sit on the right, with the date and time at the far end.
 
 ### `install.sh`
 

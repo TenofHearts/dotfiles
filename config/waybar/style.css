@@ -1,0 +1,130 @@
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "0xProto Nerd Font", "0xProto", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+window#waybar {
+  min-height: 28px;
+  background: rgba(0, 0, 0, 0.40);
+  color: #f5f5f7;
+}
+
+#waybar > box {
+  padding: 0 12px;
+}
+
+#submap,
+#window,
+#pulseaudio,
+#network,
+#bluetooth,
+#battery,
+#clock {
+  min-height: 28px;
+  padding: 0;
+}
+
+#submap {
+  color: #f5f5f7;
+  font-weight: 600;
+}
+
+#submap.Command, #submap.Move, #submap.Adjust, #submap.Admin {
+  color: #89b4fa;
+}
+
+#window {
+  min-width: 0;
+  color: #b8b8bd;
+}
+
+#custom-workspace-layout {
+  margin: 4px 0 4px 8px;
+  padding: 0 6px;
+  border-radius: 3px;
+  background-color: rgba(245, 245, 247, 0.14);
+  color: #e4e4e8;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+window#waybar.with-noctalia #custom-workspace-layout {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+#workspaces {
+  padding: 0 4px;
+}
+
+#workspaces button {
+  min-width: 18px;
+  min-height: 18px;
+  margin: 5px 1px;
+  padding: 0;
+  border-radius: 3px;
+  color: #b8b8bd;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 120ms, color 120ms;
+}
+
+window#waybar.with-noctalia #workspaces button {
+  margin: 8px 1px 9px;
+}
+
+#workspaces button.active {
+  background: rgba(255, 255, 255, 0.85);
+  color: #18181a;
+  font-weight: 600;
+}
+
+#workspaces button:hover {
+  background: rgba(155, 165, 185, 0.25);
+  color: #f5f5f7;
+}
+
+/* Match Noctalia: keep each monitor's visible workspace and urgent badges. */
+window#waybar #workspaces button.empty:not(.active):not(.visible):not(.urgent) {
+  min-width: 0;
+  margin-left: 0;
+  margin-right: 0;
+  opacity: 0;
+}
+
+#workspaces button.empty:not(.active):not(.visible):not(.urgent) label {
+  font-size: 0;
+}
+
+#pulseaudio,
+#network,
+#bluetooth,
+#battery,
+#clock {
+  min-height: 18px;
+  margin: 5px 0;
+  padding: 0 6px;
+  background: transparent;
+  color: #f5f5f7;
+}
+
+#network.disconnected,
+#bluetooth.disabled,
+#pulseaudio.muted {
+  color: #b8b8bd;
+}
+
+#battery.warning {
+  color: #f9e2af;
+}
+
+#battery.critical:not(.charging) {
+  color: #f38ba8;
+}
+
+#clock {
+  font-weight: 600;
+}

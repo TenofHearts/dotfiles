@@ -18,6 +18,9 @@ FILES = {
     ".config/opencode/cli.json": "config/ai/opencode/cli.json",
     ".codex/dotfiles.config.toml": "config/ai/codex/dotfiles.config.toml",
     ".config/nvim": "config/nvim",
+    ".config/hypr": "config/hyprland",
+    ".config/waybar": "config/waybar",
+    ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
     ".config/oh-my-posh/theme.omp.json": "config/oh-my-posh/theme.omp.json",
     ".config/cowsay/stegosaurus_and_cat.cow": "config/cowsay/stegosaurus_and_cat.cow",
 }
@@ -46,7 +49,7 @@ def application(source):
 
 def selected_files(only=None):
     return {name: src for name, src in FILES.items()
-            if only is None or application(src) == only}
+            if (application(src) == only if only else application(src) not in ("hyprland", "waybar", "noctalia"))}
 
 
 def install(home, dry_run, only=None, force=False):

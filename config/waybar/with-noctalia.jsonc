@@ -1,0 +1,9 @@
+{
+  // Noctalia reserves 35 px even while hidden. Overlap that reservation so
+  // both surfaces start at y=0; the top 3 px are Noctalia's reveal target.
+  "name": "with-noctalia",
+  "height": 35,
+  "exclusive": false,
+  "margin-top": -35,
+  "include": ["~/.config/waybar/config.jsonc"]
+}

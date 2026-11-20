@@ -191,3 +191,15 @@ class LinkTests(unittest.TestCase):
                         "--force", "--home", str(self.home)], check=True, capture_output=True)
         self.assertTrue(vim.is_symlink())
         self.assertEqual(shell.read_text(), "keep\n")
+
+    def test_hyprland_and_waybar_are_independent_configuration_links(self):
+        links.install(self.home, False)
+        self.assertFalse((self.home / ".config/hypr").exists())
+        self.assertFalse((self.home / ".config/waybar").exists())
+        links.install(self.home, False, only="hyprland")
+        self.assertTrue((self.home / ".config/hypr").is_symlink())
+        self.assertFalse((self.home / ".config/waybar").exists())
+        links.install(self.home, False, only="waybar")
+        self.assertTrue((self.home / ".config/waybar").is_symlink())
+        self.assertEqual(links.status(self.home, only="hyprland"), 0)
+        self.assertEqual(links.status(self.home, only="waybar"), 0)

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hyprland shortcuts</title>
+  <style>
+    :root { color-scheme: dark; font: 15px system-ui, sans-serif; }
+    body { max-width: 900px; margin: 40px auto; padding: 0 24px; background: #1e1e2e; color: #cdd6f4; }
+    h1 { color: #89b4fa; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #45475a; text-align: left; }
+    kbd { padding: 2px 6px; border: 1px solid #585b70; border-radius: 4px; background: #313244; }
+    .note { color: #f9e2af; }
+  </style>
+</head>
+<body>
+  <h1>Hyprland shortcuts</h1>
+  <p><kbd>Alt + H/J/K/L</kbd> focuses windows. <kbd>Alt + 1-9</kbd> switches workspaces. <kbd>Alt + Q</kbd> closes the focused window.</p>
+  <table>
+    <thead><tr><th>Mode</th><th>Shortcut</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Every mode</td><td><kbd>Alt + Shift + ;</kbd></td><td>Open Command mode</td></tr>
+      <tr><td>Move</td><td><kbd>Shift + H/J/K/L</kbd></td><td>Move the current workspace to the nearest monitor in that direction</td></tr>
+      <tr><td>Command</td><td><kbd>M</kbd></td><td>Move mode</td></tr>
+      <tr><td>Command</td><td><kbd>R</kbd></td><td>Adjust mode</td></tr>
+      <tr><td>Command</td><td><kbd>A</kbd></td><td>Admin mode</td></tr>
+      <tr><td>Move</td><td><kbd>H/J/K/L</kbd></td><td>Move the focused window</td></tr>
+      <tr><td>Move</td><td><kbd>1-9</kbd></td><td>Move the focused window to a workspace and follow it</td></tr>
+      <tr><td>Adjust</td><td><kbd>H/J/K/L</kbd></td><td>Resize the focused window by 25 pixels</td></tr>
+      <tr><td>Adjust</td><td><kbd>F</kbd></td><td>Toggle fullscreen</td></tr>
+      <tr><td>Adjust</td><td><kbd>T</kbd> / <kbd>W</kbd></td><td>Set tiled / toggle floating</td></tr>
+      <tr><td>Adjust</td><td><kbd>Space</kbd></td><td>Cycle this workspace: Dwindle, Scrolling, Master, Monocle</td></tr>
+      <tr><td>Admin</td><td><kbd>R</kbd></td><td>Reload Hyprland configuration</td></tr>
+      <tr><td>Admin</td><td><kbd>D</kbd></td><td>Force a renderer redraw</td></tr>
+    </tbody>
+  </table>
+  <p>Escape or Enter leaves any mode. In Command, press <kbd>?</kbd> for this guide or <kbd>Alt + Shift + ;</kbd> to return to Normal.</p>
+  <p class="note">Join, minimize, pause-management, and accordion bindings are intentionally unassigned because Hyprland has no loyal equivalent for them.</p>
+</body>
+</html>
