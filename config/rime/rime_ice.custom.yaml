@@ -1,0 +1,20 @@
+patch:
+  # Start new input sessions in English; existing sessions retain their mode.
+  switches/@0/reset: 1
+
+  punctuator:
+    full_shape:
+      ",": ","
+      ".": "."
+      "?": "?"
+      "!": "!"
+      ":": ":"
+      ";": ";"
+
+  menu/page_size: 8
+
+  selector/linear/bindings:
+    Up: previous_candidate
+    Down: next_candidate
+    Left: noop
+    Right: noop
