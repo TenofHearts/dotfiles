@@ -203,3 +203,42 @@ class LinkTests(unittest.TestCase):
         self.assertTrue((self.home / ".config/waybar").is_symlink())
         self.assertEqual(links.status(self.home, only="hyprland"), 0)
         self.assertEqual(links.status(self.home, only="waybar"), 0)
+
+    def test_desktop_input_and_capture_are_opt_in_and_preserve_user_data(self):
+        rime = self.home / ".local/share/fcitx5/rime"
+        rime.mkdir(parents=True)
+        learned = rime / "user.yaml"
+        learned.write_text("local state\n")
+        links.install(self.home, False, force=True)
+        self.assertEqual(list(rime.iterdir()), [learned])
+        self.assertFalse((self.home / ".config/fcitx5").exists())
+        self.assertFalse((self.home / ".config/shotori").exists())
+        links.install(self.home, False, only="rime", force=True)
+        self.assertTrue((rime / "default.custom.yaml").is_symlink())
+        self.assertEqual(learned.read_text(), "local state\n")
+        self.assertFalse((self.home / ".config/shotori").exists())
+
+    def test_solaar_rules_do_not_replace_pairing_data(self):
+        directory = self.home / ".config/solaar"
+        directory.mkdir(parents=True)
+        device_settings = directory / "config.yaml"
+        device_settings.write_text("local device settings\n")
+        links.install(self.home, False, force=True)
+        self.assertFalse((directory / "rules.yaml").exists())
+        links.install(self.home, False, only="solaar", force=True)
+        self.assertTrue((directory / "rules.yaml").is_symlink())
+        self.assertEqual(device_settings.read_text(), "local device settings\n")
+
+    def test_rime_install_and_status_use_fcitx_xdg_roots(self):
+        config, data = self.home / "settings", self.home / "data"
+        env = dict(os.environ, HOME=str(self.home), XDG_CONFIG_HOME=str(config), XDG_DATA_HOME=str(data))
+        cli = ["python3", str(links.ROOT / "scripts/links.py")]
+        for action in ("install", "status"):
+            subprocess.run(cli + [action, "--only", "rime"], env=env, check=True, capture_output=True)
+        self.assertTrue((config / "fcitx5/profile").is_symlink())
+        self.assertTrue((data / "fcitx5/rime/default.custom.yaml").is_symlink())
+        self.assertTrue((data / "fcitx5/themes/purity-of-form/theme.conf").is_symlink())
+        sandbox = self.home / "other-home"
+        subprocess.run(cli + ["install", "--only", "rime", "--home", str(sandbox)],
+                       env=env, check=True, capture_output=True)
+        self.assertTrue((sandbox / ".local/share/fcitx5/rime/default.custom.yaml").is_symlink())

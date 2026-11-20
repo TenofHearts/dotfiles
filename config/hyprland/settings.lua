@@ -40,6 +40,7 @@ hl.config({
     cursor = { no_warps = true },
     input = {
         kb_layout = "us",
+        kb_options = "caps:escape",
         follow_mouse = 0,
         sensitivity = 0,
         touchpad = {
@@ -56,4 +57,9 @@ hl.config({
 hl.on("hyprland.start", function()
     -- Waybar is deliberately optional: this configuration never installs it.
     hl.exec_cmd("command -v waybar >/dev/null && exec waybar")
+    -- UWSM runs XDG autostart entries. A plain Hyprland session does not.
+    hl.exec_cmd([[if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/solaar.desktop" ] &&
+        command -v solaar >/dev/null && ! (command -v uwsm >/dev/null && uwsm check is-active compositor-only); then
+        exec solaar -w hide
+    fi]])
 end)

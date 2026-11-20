@@ -30,8 +30,9 @@ Fcitx5 first, then run:
 )
 ```
 
-Start Fcitx5 again after an offline deployment. New Rime input contexts start
-in English. Either Shift key switches modes; pressing Shift while composing
+Start Fcitx5 again after an offline deployment. Rime is the only Fcitx5 input
+method; `us` is the underlying key layout. New Rime input contexts start
+in English. Either Shift key switches between English and Chinese; pressing Shift while composing
 commits the raw code. Classic UI uses Noto Sans CJK SC and the system light/dark
 preference; inline preedit also depends on the application.
 

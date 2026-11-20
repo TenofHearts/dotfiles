@@ -8,6 +8,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+DESKTOP_APPS = {"hyprland", "waybar", "noctalia", "rime", "shotori", "solaar"}
 FILES = {
     ".bashrc": "config/bash/.bashrc",
     ".zshrc": "config/zsh/.zshrc",
@@ -21,9 +22,21 @@ FILES = {
     ".config/hypr": "config/hyprland",
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
+    ".config/shotori/settings.toml": "config/shotori/settings.toml",
+    ".config/solaar/rules.yaml": "config/solaar/rules.yaml",
+    ".config/autostart/solaar.desktop": "config/solaar/solaar.desktop",
+    ".local/share/fcitx5/rime/default.custom.yaml": "config/rime/default.custom.yaml",
+    ".local/share/fcitx5/rime/rime_ice.custom.yaml": "config/rime/rime_ice.custom.yaml",
+    ".config/fcitx5/profile": "config/rime/fcitx5/profile",
+    ".config/fcitx5/conf/rime.conf": "config/rime/fcitx5/conf/rime.conf",
+    ".config/fcitx5/conf/classicui.conf": "config/rime/fcitx5/conf/classicui.conf",
     ".config/oh-my-posh/theme.omp.json": "config/oh-my-posh/theme.omp.json",
     ".config/cowsay/stegosaurus_and_cat.cow": "config/cowsay/stegosaurus_and_cat.cow",
 }
+
+for theme in ("purity-of-essence", "purity-of-form"):
+    for asset in ("theme.conf", "panel.svg", "highlight.svg"):
+        FILES[f".local/share/fcitx5/themes/{theme}/{asset}"] = f"config/rime/fcitx5/themes/{theme}/{asset}"
 
 
 def exists(path):
@@ -49,12 +62,31 @@ def application(source):
 
 def selected_files(only=None):
     return {name: src for name, src in FILES.items()
-            if (application(src) == only if only else application(src) not in ("hyprland", "waybar", "noctalia"))}
+            if (application(src) == only if only else application(src) not in DESKTOP_APPS)}
+
+
+def xdg_root(home, variable, default):
+    root = Path(os.environ.get(variable, ""))
+    if not root.is_absolute():  # XDG base directories must be absolute.
+        return home / default
+    if ".." in root.parts:
+        raise RuntimeError(f"Use an absolute {variable} without '..': {root}")
+    if home != Path.home().absolute() and root != home and home not in root.parents:
+        return home / default  # An alternate --home must not write into the real account.
+    return root
+
+
+def destinations(home, only):
+    for name, source in selected_files(only).items():
+        dest = home / name
+        if application(source) == "rime":
+            base, variable = (".config", "XDG_CONFIG_HOME") if name.startswith(".config/") else (".local/share", "XDG_DATA_HOME")
+            dest = xdg_root(home, variable, base) / Path(name).relative_to(base)
+        yield dest, ROOT / source
 
 
 def install(home, dry_run, only=None, force=False):
-    pending = [(home / name, ROOT / src) for name, src in selected_files(only).items()
-               if not linked(home / name, ROOT / src)]
+    pending = [(dest, src) for dest, src in destinations(home, only) if not linked(dest, src)]
     conflicts = [(dest, source) for dest, source in pending if exists(dest) and not force]
     for dest, source in conflicts:
         print(f"Skip existing configuration: {dest} (use --force to replace)")
@@ -104,9 +136,9 @@ def restore(manifest, dry_run):
 
 def status(home, only=None):
     bad = False
-    for name, source in selected_files(only).items():
-        ok = linked(home / name, ROOT / source)
-        print(f"{'OK' if ok else 'MISSING/CHANGED'} {home / name}")
+    for dest, source in destinations(home, only):
+        ok = linked(dest, source)
+        print(f"{'OK' if ok else 'MISSING/CHANGED'} {dest}")
         bad |= not ok
     return int(bad)
 

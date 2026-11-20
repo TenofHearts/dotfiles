@@ -179,7 +179,7 @@ config/                  # Shell/editor/prompt configuration and Git submodules
 tests/                   # File-preservation and package-transaction safety tests
 ```
 
-The linker uses fixed destinations under the selected home and does not consult `XDG_CONFIG_HOME`. It rejects symlinked destination parents rather than following them into another configuration tree. Configuration sources remain in this checkout; keep it in place.
+The linker uses fixed destinations under the selected home, except for Rime: its Fcitx5 settings use `XDG_CONFIG_HOME`, and its themes and engine patches use `XDG_DATA_HOME`, with the standard home-directory defaults. When testing with an alternate `--home`, XDG roots outside that home are ignored. The linker rejects symlinked destination parents rather than following them into another configuration tree. Configuration sources remain in this checkout; keep it in place.
 
 | Source | Destination |
 | --- | --- |
@@ -202,6 +202,16 @@ The linker uses fixed destinations under the selected home and does not consult 
 ### Native Hyprland desktop
 
 The desktop profiles are opt-in. Preview each with `./install.sh --only hyprland --dry-run` or `./install.sh --only waybar --dry-run`; omit `--dry-run` to link it. Existing configuration directories are skipped. To keep a distribution's launcher, monitor settings or app rules, merge the desired Lua modules into its existing profile. Neither profile installs software.
+
+The Hyprland profile maps Caps Lock to Escape using the `caps:escape` XKB option in [settings.lua](config/hyprland/settings.lua). When keeping a distribution's input config, add `caps:escape` to its `input.kb_options` list.
+
+For Chinese input, the [Fcitx5 and Rime setup guide](config/rime/README.md) reproduces the macOS Rime Ice revision and engine patches. Rime configuration is opt-in; the installer links individual files and leaves learned dictionaries in the user's data directory.
+
+In every Hyprland mode, `Alt+Shift+S` opens Shotori's region selector. After selecting a region, use `Ctrl+C` to copy, `Ctrl+T` to pin, or `Ctrl+S` to open the save dialog. On another desktop, `./install.sh --only shotori` links the [Shotori shortcuts](config/shotori/settings.toml).
+
+For the MX Anywhere 3S, `./install.sh --only solaar` links the [mouse rules](config/solaar/rules.yaml) and Hyprland XDG autostart entry. On a newly paired mouse, use Solaar's **Key/Button Diversion** to divert **Smart Shift**, **Forward Button**, and **Back Button**. Smart Shift toggles media with `playerctl play-pause`, Forward opens Shotori's region selector directly, and Back does nothing. Solaar saves diversion per device outside this checkout.
+
+UWSM runs the Solaar desktop entry at login. The repository's [Hyprland startup hook](config/hyprland/settings.lua) starts `solaar -w hide` for plain Hyprland when that entry is installed. If you keep a distribution's plain Hyprland profile without an XDG autostart runner, add that command to its `hyprland.start` hook.
 
 The [shortcut guide](config/hyprland/help.html) covers the modal bindings for Hyprland 0.57.2. Waybar shows the mode and title on the left and volume, network, Bluetooth, battery and clock on the right. Like Noctalia, its center shows each output's occupied workspaces, plus its visible workspace and any urgent workspace even if empty.
 

@@ -1,0 +1,10 @@
+%YAML 1.3
+---
+- Device: MX Anywhere 3S
+- Key: [Smart Shift, pressed]
+- Execute: [playerctl, play-pause]
+---
+- Device: MX Anywhere 3S
+- Key: [Forward Button, pressed]
+- Execute: [shotori, gui]
+# Back Button is diverted on the mouse and deliberately has no action.

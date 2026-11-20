@@ -7,9 +7,11 @@ import shutil
 import subprocess
 import tempfile
 
+from links import check_parents, xdg_root
+
 REVISION = "3aea6d3694fb3d94ec663641f021f788822897ad"
 URL = "https://github.com/iDvel/rime-ice.git"
-DATA = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share")
+DATA = xdg_root(Path.home(), "XDG_DATA_HOME", ".local/share")
 TARGET = DATA / "fcitx5/rime"
 
 
@@ -22,6 +24,7 @@ def runtime_file(path):
 
 
 def main():
+    check_parents(TARGET / "default.yaml", Path.home())
     with tempfile.TemporaryDirectory(prefix="dotfiles-rime-") as tmp:
         repo = Path(tmp)
         def git(*args, **kwargs):
@@ -39,11 +42,7 @@ def main():
         for path in files:
             if (repo / path).is_symlink():
                 raise SystemExit(f"Unexpected symlink in Rime Ice: {path}")
-            for directory in (TARGET / path).parents:
-                if directory == DATA:
-                    break
-                if directory.is_symlink():
-                    raise SystemExit(f"Symlinked data directory needs manual review: {directory}")
+            check_parents(TARGET / path, Path.home())
 
         added = 0
         for path in files:

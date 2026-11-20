@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Solaar
+TryExec=solaar
+Exec=solaar -w hide
+OnlyShowIn=Hyprland;
