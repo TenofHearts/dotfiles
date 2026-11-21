@@ -31,7 +31,7 @@ Desktop packages are opt-in on CachyOS (`./scripts/software.py plan --group desk
 
 Desktop configuration links are opt-in. Run `./install.sh --only APP` for each profile you use; `./install.sh --help` lists the names.
 
-- **Kitty and Ghostty:** Install `ttf-0xproto-nerd` on CachyOS for the shared 12 pt font. If you already have a terminal profile, merge the [Kitty](config/kitty/kitty.conf) or [Ghostty](config/ghostty/config.ghostty) settings to keep your theme and other shortcuts.
+- **Kitty and Ghostty** use the [TTY submodule](https://github.com/TenofHearts/tty-config) at `config/tty`. Run `./install.sh --only kitty` or `./install.sh --only ghostty` to install or migrate the corresponding dotfiles symlinks. Install `ttf-0xproto-nerd` on CachyOS for the shared 12 pt font. If you manage your own terminal profile, review the submodule settings before merging them into your profile.
 - **Hyprland:** If you keep a distribution's existing profile, merge the [settings](config/hyprland/settings.lua) and [bindings](config/hyprland/bindings.lua) you want. See the [shortcut guide](config/hyprland/help.html).
 - **Waybar with Noctalia:** Link `waybar` and `noctalia`. In the existing Noctalia session, launch `waybar -c ~/.config/waybar/with-noctalia.jsonc` once at login.
 - **Rime:** Follow the [Fcitx5 deployment guide](config/rime/README.md) to install the pinned schema and link the input profile.

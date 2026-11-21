@@ -18,6 +18,7 @@ if [[ " $* " != *" --dry-run "* ]]; then
     case "$only" in
         "") git -C "$ROOT" submodule update --init --recursive ;;
         codex|opencode) git -C "$ROOT" submodule update --init --recursive -- config/ai ;;
+        ghostty|kitty) git -C "$ROOT" submodule update --init --recursive -- config/tty ;;
         nvim|tmux) git -C "$ROOT" submodule update --init --recursive -- "config/$only" ;;
     esac
 fi

@@ -43,7 +43,7 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, True)
         self.assertEqual(list(self.home.iterdir()), [])
 
-    def test_ai_only_installer_initializes_its_submodule(self):
+    def test_app_only_installer_initializes_its_submodule(self):
         bin_dir = self.home / "bin"
         bin_dir.mkdir()
         log = self.home / "git-args"
@@ -52,9 +52,11 @@ class LinkTests(unittest.TestCase):
         fake_git.chmod(0o755)
         env = {**os.environ, "PATH": str(bin_dir) + os.pathsep + os.environ["PATH"],
                "DOTFILES_TEST_GIT_LOG": str(log)}
-        for app, destination in (
-            ("codex", ".codex/dotfiles.config.toml"),
-            ("opencode", ".config/opencode/dotfiles.config.json"),
+        for app, destination, submodule in (
+            ("codex", ".codex/dotfiles.config.toml", "config/ai"),
+            ("opencode", ".config/opencode/dotfiles.config.json", "config/ai"),
+            ("ghostty", ".config/ghostty/config.ghostty", "config/tty"),
+            ("kitty", ".config/kitty/kitty.conf", "config/tty"),
         ):
             for option in (["--only", app], ["--only=" + app]):
                 with self.subTest(option=option):
@@ -62,9 +64,28 @@ class LinkTests(unittest.TestCase):
                                     "--home", str(self.home)], env=env, check=True, capture_output=True)
                     self.assertEqual(log.read_text().splitlines(),
                                      ["-C", str(links.ROOT), "submodule", "update", "--init",
-                                      "--recursive", "--", "config/ai"])
+                                      "--recursive", "--", submodule])
                     self.assertTrue((self.home / destination).is_symlink())
         self.assertFalse((self.home / ".bashrc").exists())
+
+    def test_terminal_install_migrates_only_legacy_dotfiles_links(self):
+        ghostty = self.home / ".config/ghostty/config.ghostty"
+        kitty = self.home / ".config/kitty/kitty.conf"
+        ghostty.parent.mkdir(parents=True)
+        kitty.parent.mkdir(parents=True)
+        legacy = links.ROOT / "config/ghostty/config.ghostty"
+        ghostty.symlink_to(os.path.relpath(legacy, ghostty.parent))
+        shader = ghostty.parent / "cursor_tail.glsl"
+        shader.symlink_to(links.ROOT / "config/shell/ghostty/cursor_tail.glsl")
+        kitty.write_text("local profile\n")
+        links.install(self.home, False)
+        links.install(self.home, True, only="ghostty")
+        self.assertTrue(links.linked(ghostty, legacy))
+        links.install(self.home, False, only="ghostty")
+        links.install(self.home, False, only="kitty")
+        self.assertEqual(links.status(self.home, only="ghostty"), 0)
+        self.assertTrue(shader.is_file())
+        self.assertEqual(kitty.read_text(), "local profile\n")
 
     def test_opencode_preserves_local_settings_and_key(self):
         config = self.home / ".config/opencode"

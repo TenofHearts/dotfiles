@@ -19,8 +19,9 @@ FILES = {
     ".config/opencode/cli.json": "config/ai/opencode/cli.json",
     ".codex/dotfiles.config.toml": "config/ai/codex/dotfiles.config.toml",
     ".config/nvim": "config/nvim",
-    ".config/ghostty/config.ghostty": "config/ghostty/config.ghostty",
-    ".config/kitty/kitty.conf": "config/kitty/kitty.conf",
+    ".config/ghostty/config.ghostty": "config/tty/ghostty/config.ghostty",
+    ".config/ghostty/cursor_tail.glsl": "config/tty/ghostty/cursor_tail.glsl",
+    ".config/kitty/kitty.conf": "config/tty/kitty/kitty.conf",
     ".config/hypr": "config/hyprland",
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
@@ -60,7 +61,7 @@ def check_parents(dest, home):
 
 def application(source):
     parts = source.split("/")
-    return parts[2] if parts[1] == "ai" else parts[1]
+    return parts[2] if parts[1] in {"ai", "tty"} else parts[1]
 
 
 def selected_files(only=None):
@@ -89,11 +90,18 @@ def destinations(home, only):
 
 
 def install(home, dry_run, only=None, force=False):
-    pending = [(dest, src) for dest, src in destinations(home, only) if not linked(dest, src)]
-    conflicts = [(dest, source) for dest, source in pending if exists(dest) and not force]
-    for dest, source in conflicts:
-        print(f"Skip existing configuration: {dest} (use --force to replace)")
-    pending = [(dest, source) for dest, source in pending if force or not exists(dest)]
+    tty_root = ROOT / "config/tty"
+    pending = []
+    for dest, source in destinations(home, only):
+        if linked(dest, source):
+            continue
+        legacy_link = (tty_root in source.parents
+                       and any(linked(dest, old_root / source.relative_to(tty_root))
+                               for old_root in (tty_root.parent, tty_root.with_name("shell"))))
+        if exists(dest) and not force and not legacy_link:
+            print(f"Skip existing configuration: {dest} (use --force to replace)")
+        else:
+            pending.append((dest, source))
     # Never follow a parent directory link into an unrelated checkout.
     for dest, source in pending:
         if not source.exists():

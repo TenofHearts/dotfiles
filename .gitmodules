@@ -7,3 +7,6 @@
 [submodule "config/ai"]
 	path = config/ai
 	url = https://github.com/TenofHearts/ai-config.git
+[submodule "config/tty"]
+	path = config/tty
+	url = https://github.com/TenofHearts/tty-config.git
