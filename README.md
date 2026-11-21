@@ -35,6 +35,6 @@ Desktop configuration links are opt-in. Run `./install.sh --only APP` for each p
 - **Hyprland:** If you keep a distribution's existing profile, merge the [settings](config/hyprland/settings.lua) and [bindings](config/hyprland/bindings.lua) you want. See the [shortcut guide](config/hyprland/help.html).
 - **Waybar with Noctalia:** Link `waybar` and `noctalia`. In the existing Noctalia session, launch `waybar -c ~/.config/waybar/with-noctalia.jsonc` once at login.
 - **Rime:** Follow the [Fcitx5 deployment guide](config/rime/README.md) to install the pinned schema and link the input profile.
-- **Solaar:** After linking `solaar`, enable **Key/Button Diversion** for Smart Shift, Forward, and Back on each newly paired MX Anywhere 3S. If your own Hyprland profile has no XDG autostart runner, start `solaar -w hide` at login.
+- **Solaar:** After linking `solaar`, enable **Key/Button Diversion** for Forward, Back, and the top button (Smart Shift on the MX Anywhere 3S; DPI Switch on the Lift). The top button toggles play/pause, Forward opens Shotori, and Back does nothing. If your own Hyprland profile has no XDG autostart runner, start `solaar -w hide` at login.
 
 For app-specific setup, see [Neovim](config/nvim/README.md), [tmux](config/tmux/README.md), and [AI tools](config/ai/README.md).

@@ -4,7 +4,13 @@
 - Key: [Smart Shift, pressed]
 - Execute: [playerctl, play-pause]
 ---
-- Device: MX Anywhere 3S
+- Device: LIFT VERTICAL ERGONOMIC MOUSE
+- Key: [DPI Switch, pressed]
+- Execute: [playerctl, play-pause]
+---
+- Or:
+  - Device: MX Anywhere 3S
+  - Device: LIFT VERTICAL ERGONOMIC MOUSE
 - Key: [Forward Button, pressed]
 - Execute: [shotori, gui]
-# Back Button is diverted on the mouse and deliberately has no action.
+# Back Button is diverted on both mice and deliberately has no action.
