@@ -8,7 +8,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_APPS = {"ghostty", "hyprland", "kitty", "waybar", "noctalia", "rime", "shotori", "solaar"}
+DESKTOP_APPS = {"ghostty", "hyprland", "kitty", "waybar", "noctalia", "rime", "shotori"}
 FILES = {
     ".bashrc": "config/bash/.bashrc",
     ".zshrc": "config/zsh/.zshrc",
@@ -22,13 +22,10 @@ FILES = {
     ".config/ghostty/config.ghostty": "config/tty/ghostty/config.ghostty",
     ".config/ghostty/cursor_tail.glsl": "config/tty/ghostty/cursor_tail.glsl",
     ".config/kitty/kitty.conf": "config/tty/kitty/kitty.conf",
-    ".config/hypr": "config/hyprland",
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
     ".config/noctalia/zz-dotfiles-launcher.toml": "config/noctalia/zz-dotfiles-launcher.toml",
     ".config/shotori/settings.toml": "config/shotori/settings.toml",
-    ".config/solaar/rules.yaml": "config/solaar/rules.yaml",
-    ".config/autostart/solaar.desktop": "config/solaar/solaar.desktop",
     ".local/share/fcitx5/rime/default.custom.yaml": "config/rime/default.custom.yaml",
     ".local/share/fcitx5/rime/rime_ice.custom.yaml": "config/rime/rime_ice.custom.yaml",
     ".config/fcitx5/profile": "config/rime/fcitx5/profile",
@@ -37,6 +34,13 @@ FILES = {
     ".config/oh-my-posh/theme.omp.json": "config/oh-my-posh/theme.omp.json",
     ".config/cowsay/stegosaurus_and_cat.cow": "config/cowsay/stegosaurus_and_cat.cow",
 }
+
+# Only shared files are linked; both directories and local Lua modules stay user-owned.
+for filename in ("hyprland.lua", "bindings.lua", "help.html", "config/animations.lua",
+                 "config/binds.lua", "config/colors.lua", "config/decorations.lua", "config/inputs.lua",
+                 "config/misc.lua", "config/monitors.lua", "config/variables.lua", "config/windowrules.lua",
+                 "config/workspaces.lua"):
+    FILES[f".config/hypr/{filename}"] = f"config/hyprland/{filename}"
 
 for theme in ("purity-of-essence", "purity-of-form"):
     for asset in ("theme.conf", "panel.svg", "highlight.svg"):
@@ -83,7 +87,7 @@ def xdg_root(home, variable, default):
 def destinations(home, only):
     for name, source in selected_files(only).items():
         dest = home / name
-        if application(source) == "rime":
+        if application(source) in {"rime", "hyprland"}:
             base, variable = (".config", "XDG_CONFIG_HOME") if name.startswith(".config/") else (".local/share", "XDG_DATA_HOME")
             dest = xdg_root(home, variable, base) / Path(name).relative_to(base)
         yield dest, ROOT / source

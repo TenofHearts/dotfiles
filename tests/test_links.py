@@ -4,6 +4,7 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -218,12 +219,58 @@ class LinkTests(unittest.TestCase):
         self.assertFalse((self.home / ".config/hypr").exists())
         self.assertFalse((self.home / ".config/waybar").exists())
         links.install(self.home, False, only="hyprland")
-        self.assertTrue((self.home / ".config/hypr").is_symlink())
+        hypr = self.home / ".config/hypr"
+        self.assertFalse(hypr.is_symlink())
+        self.assertFalse((hypr / "config").is_symlink())
+        for name in ("hyprland.lua", "config/inputs.lua", "bindings.lua", "help.html"):
+            self.assertTrue(links.linked(hypr / name, links.ROOT / "config/hyprland" / name))
         self.assertFalse((self.home / ".config/waybar").exists())
         links.install(self.home, False, only="waybar")
         self.assertTrue((self.home / ".config/waybar").is_symlink())
         self.assertEqual(links.status(self.home, only="hyprland"), 0)
         self.assertEqual(links.status(self.home, only="waybar"), 0)
+
+    def test_hyprland_force_preserves_local_modules(self):
+        hypr = self.home / ".config/hypr"
+        (hypr / "config").mkdir(parents=True)
+        paths = [hypr / name for name in ("config/autostart.lua", "config/environment.lua",
+                                          "config/local.lua", "xdph.conf")]
+        for path in paths:
+            path.write_text("local settings\n")
+        links.install(self.home, False, only="hyprland", force=True)
+        self.assertEqual(links.status(self.home, only="hyprland"), 0)
+        for path in paths:
+            self.assertFalse(path.is_symlink())
+            self.assertEqual(path.read_text(), "local settings\n")
+
+    def test_hyprland_force_rejects_legacy_directory_link(self):
+        hypr = self.home / ".config/hypr"
+        hypr.parent.mkdir()
+        hypr.symlink_to(links.ROOT / "config/hyprland")
+        with self.assertRaisesRegex(RuntimeError, "Symlinked parent"):
+            links.install(self.home, False, only="hyprland", force=True)
+        self.assertTrue(hypr.is_symlink())
+
+    @unittest.skipUnless(shutil.which("Hyprland"), "requires the Hyprland Lua config verifier")
+    def test_hyprland_loads_optional_local_files_from_linked_profile(self):
+        config = self.home / "settings"
+        profile = config / "hypr/hyprland.lua"
+        env = dict(os.environ, XDG_CONFIG_HOME=str(config))
+        subprocess.run(["python3", str(links.ROOT / "scripts/links.py"), "install", "--home", str(self.home),
+                        "--only", "hyprland"], env=env, check=True, capture_output=True)
+
+        def verify():
+            result = subprocess.run(["Hyprland", "--verify-config", "--config", str(profile)],
+                                    env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            return result.stdout
+
+        self.assertIn("config ok", verify())
+        modules = profile.parent / "config"
+        (modules / "autostart.lua").write_text("STARTUP_LOADED = true\n")
+        (modules / "environment.lua").write_text("ENV_LOADED = true\n")
+        (modules / "local.lua").write_text('if STARTUP_LOADED and ENV_LOADED and TERMINAL then\n'
+                                           '    error("local override reached")\nend\n')
+        self.assertIn("local override reached", verify())
 
     def test_desktop_input_and_capture_are_opt_in_and_preserve_user_data(self):
         rime = self.home / ".local/share/fcitx5/rime"
@@ -238,17 +285,6 @@ class LinkTests(unittest.TestCase):
         self.assertTrue((rime / "default.custom.yaml").is_symlink())
         self.assertEqual(learned.read_text(), "local state\n")
         self.assertFalse((self.home / ".config/shotori").exists())
-
-    def test_solaar_rules_do_not_replace_pairing_data(self):
-        directory = self.home / ".config/solaar"
-        directory.mkdir(parents=True)
-        device_settings = directory / "config.yaml"
-        device_settings.write_text("local device settings\n")
-        links.install(self.home, False, force=True)
-        self.assertFalse((directory / "rules.yaml").exists())
-        links.install(self.home, False, only="solaar", force=True)
-        self.assertTrue((directory / "rules.yaml").is_symlink())
-        self.assertEqual(device_settings.read_text(), "local device settings\n")
 
     def test_rime_install_and_status_use_fcitx_xdg_roots(self):
         config, data = self.home / "settings", self.home / "data"
