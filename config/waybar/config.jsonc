@@ -3,7 +3,7 @@
   "position": "top",
   "height": 28,
   "spacing": 2,
-  "modules-left": ["hyprland/submap", "hyprland/window", "custom/workspace-layout"],
+  "modules-left": ["hyprland/window", "custom/workspace-layout", "hyprland/submap"],
   "modules-center": ["hyprland/workspaces"],
   "modules-right": ["pulseaudio", "network", "bluetooth", "battery", "clock"],
 

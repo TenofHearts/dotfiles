@@ -10,4 +10,4 @@ hl.workspace_rule({ workspace = "3", monitor = MONITOR1, default = true, persist
 
 -- For other layouts such as scrolling, see example below
 -- hl.workspace_rule({ workspace = "1", monitor = MONITOR1, default = true, persistent = true, layout = "scrolling" })
-hl.config({ scrolling = { direction = "right", fullscreen_on_one_column = false } })
+hl.config({ scrolling = { direction = "right", column_width = 1.0, fullscreen_on_one_column = false } })

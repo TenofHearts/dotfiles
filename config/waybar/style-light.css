@@ -4,7 +4,7 @@ window#waybar {
   background: rgba(255, 255, 255, 0.40);
 }
 
-window#waybar, #window, #submap, #pulseaudio, #network, #bluetooth, #battery, #clock {
+window#waybar, #window, #pulseaudio, #network, #bluetooth, #battery, #clock {
   color: #1d1d1f;
 }
 
@@ -16,7 +16,7 @@ window#waybar, #window, #submap, #pulseaudio, #network, #bluetooth, #battery, #c
   color: #1e4d86;
 }
 
-#custom-workspace-layout, #workspaces button:hover {
+#submap, #custom-workspace-layout, #workspaces button:hover {
   background-color: rgba(0, 0, 0, 0.10);
   color: #1d1d1f;
 }
