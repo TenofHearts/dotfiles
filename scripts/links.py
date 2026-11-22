@@ -25,6 +25,7 @@ FILES = {
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
     ".config/noctalia/zz-dotfiles-launcher.toml": "config/noctalia/zz-dotfiles-launcher.toml",
+    ".config/noctalia/zz-dotfiles-templates.toml": "config/noctalia/zz-dotfiles-templates.toml",
     ".config/shotori/settings.toml": "config/shotori/settings.toml",
     ".local/share/fcitx5/rime/default.custom.yaml": "config/rime/default.custom.yaml",
     ".local/share/fcitx5/rime/rime_ice.custom.yaml": "config/rime/rime_ice.custom.yaml",

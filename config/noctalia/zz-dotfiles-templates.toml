@@ -1,0 +1,3 @@
+[theme.templates]
+# Leave Kitty out so it keeps its dark palette when the desktop changes mode.
+builtin_ids = [ "btop", "gtk3", "gtk4", "kcolorscheme", "qt", "alacritty" ]
