@@ -8,7 +8,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_APPS = {"ghostty", "hyprland", "kitty", "waybar", "noctalia", "rime"}
+DESKTOP_APPS = {"ghostty", "hyprland", "hypr-rdp", "kitty", "waybar", "noctalia", "rime", "shotori"}
 FILES = {
     ".bashrc": "config/bash/.bashrc",
     ".zshrc": "config/zsh/.zshrc",
@@ -26,6 +26,10 @@ FILES = {
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
     ".config/noctalia/zz-dotfiles-launcher.toml": "config/noctalia/zz-dotfiles-launcher.toml",
     ".config/noctalia/zz-dotfiles-templates.toml": "config/noctalia/zz-dotfiles-templates.toml",
+    ".config/shotori/settings.toml": "config/shotori/settings.toml",
+    ".local/libexec/hypr-rdp/workspaces.py": "platform/cachyos/hypr-rdp/workspaces.py",
+    ".local/libexec/hypr-rdp/hypr_ipc.py": "platform/cachyos/hypr-rdp/hypr_ipc.py",
+    ".config/systemd/user/hypr-rdp.service.d/50-workspaces.conf": "platform/cachyos/hypr-rdp/50-workspaces.conf",
     ".local/share/fcitx5/rime/default.custom.yaml": "config/rime/default.custom.yaml",
     ".local/share/fcitx5/rime/rime_ice.custom.yaml": "config/rime/rime_ice.custom.yaml",
     ".config/fcitx5/profile": "config/rime/fcitx5/profile",
@@ -65,6 +69,8 @@ def check_parents(dest, home):
 
 def application(source):
     parts = source.split("/")
+    if parts[:2] == ["platform", "cachyos"]:
+        return parts[2]
     return parts[2] if parts[1] in {"ai", "tty"} else parts[1]
 
 
@@ -87,7 +93,7 @@ def xdg_root(home, variable, default):
 def destinations(home, only):
     for name, source in selected_files(only).items():
         dest = home / name
-        if application(source) in {"rime", "hyprland"}:
+        if application(source) in {"rime", "hyprland"} or (application(source) == "hypr-rdp" and name.startswith(".config/")):
             base, variable = (".config", "XDG_CONFIG_HOME") if name.startswith(".config/") else (".local/share", "XDG_DATA_HOME")
             dest = xdg_root(home, variable, base) / Path(name).relative_to(base)
         yield dest, ROOT / source

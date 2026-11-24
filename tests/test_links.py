@@ -272,7 +272,7 @@ class LinkTests(unittest.TestCase):
                                            '    error("local override reached")\nend\n')
         self.assertIn("local override reached", verify())
 
-    def test_desktop_input_is_opt_in_and_preserves_user_data(self):
+    def test_desktop_input_and_capture_are_opt_in_and_preserve_user_data(self):
         rime = self.home / ".local/share/fcitx5/rime"
         rime.mkdir(parents=True)
         learned = rime / "user.yaml"
@@ -280,9 +280,28 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, False, force=True)
         self.assertEqual(list(rime.iterdir()), [learned])
         self.assertFalse((self.home / ".config/fcitx5").exists())
+        settings = self.home / ".config/shotori/settings.toml"
+        self.assertFalse(settings.exists())
         links.install(self.home, False, only="rime", force=True)
         self.assertTrue((rime / "default.custom.yaml").is_symlink())
         self.assertEqual(learned.read_text(), "local state\n")
+        self.assertFalse(settings.exists())
+        links.install(self.home, False, only="shotori")
+        self.assertTrue(links.linked(settings, links.ROOT / "config/shotori/settings.toml"))
+
+    def test_rdp_dropin_is_opt_in_and_preserves_the_base_service(self):
+        units = self.home / ".config/systemd/user"
+        units.mkdir(parents=True)
+        base = units / "hypr-rdp.service"
+        base.write_text("existing service\n")
+        dropin = units / "hypr-rdp.service.d/50-workspaces.conf"
+        links.install(self.home, False)
+        self.assertFalse(dropin.exists())
+        links.install(self.home, False, only="hypr-rdp")
+        self.assertTrue(dropin.is_symlink())
+        self.assertEqual(links.status(self.home, "hypr-rdp"), 0)
+        self.assertEqual(base.read_text(), "existing service\n")
+        self.assertFalse((self.home / ".config/hypr-rdp/config.toml").exists())
 
     def test_rime_install_and_status_use_fcitx_xdg_roots(self):
         config, data = self.home / "settings", self.home / "data"
