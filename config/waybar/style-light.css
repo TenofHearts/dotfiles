@@ -8,7 +8,7 @@ window#waybar, #window, #pulseaudio, #network, #bluetooth, #battery, #clock {
   color: #1d1d1f;
 }
 
-#workspaces button, #network.disconnected, #bluetooth.disabled, #pulseaudio.muted {
+.modules-center #workspaces button, #network.disconnected, #bluetooth.disabled, #pulseaudio.muted {
   color: #55555a;
 }
 
@@ -16,12 +16,12 @@ window#waybar, #window, #pulseaudio, #network, #bluetooth, #battery, #clock {
   color: #1e4d86;
 }
 
-#submap, #custom-workspace-layout, #workspaces button:hover {
+#submap, #custom-workspace-layout, .modules-center #workspaces button:hover {
   background-color: rgba(0, 0, 0, 0.10);
   color: #1d1d1f;
 }
 
-#workspaces button.active {
+.modules-center #workspaces button.active {
   background-color: rgba(0, 0, 0, 0.75);
   color: white;
 }

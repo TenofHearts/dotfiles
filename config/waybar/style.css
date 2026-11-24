@@ -52,11 +52,11 @@ window#waybar.with-noctalia #custom-workspace-layout {
   margin-bottom: 8px;
 }
 
-#workspaces {
+.modules-center #workspaces {
   padding: 0 4px;
 }
 
-#workspaces button {
+.modules-center #workspaces button {
   min-width: 18px;
   min-height: 18px;
   margin: 5px 1px;
@@ -68,31 +68,63 @@ window#waybar.with-noctalia #custom-workspace-layout {
   transition: background-color 120ms, color 120ms;
 }
 
-window#waybar.with-noctalia #workspaces button {
+window#waybar.with-noctalia .modules-center #workspaces button {
   margin: 8px 1px 9px;
 }
 
-#workspaces button.active {
+.modules-center #workspaces button.active {
   background: rgba(255, 255, 255, 0.85);
   color: #18181a;
   font-weight: 600;
 }
 
-#workspaces button:hover {
+.modules-center #workspaces button:hover {
   background: rgba(155, 165, 185, 0.25);
   color: #f5f5f7;
 }
 
 /* Match Noctalia: keep each monitor's visible workspace and urgent badges. */
-window#waybar #workspaces button.empty:not(.active):not(.visible):not(.urgent) {
+window#waybar .modules-center #workspaces button.empty:not(.active):not(.visible):not(.urgent) {
   min-width: 0;
   margin-left: 0;
   margin-right: 0;
   opacity: 0;
 }
 
-#workspaces button.empty:not(.active):not(.visible):not(.urgent) label {
+.modules-center #workspaces button.empty:not(.active):not(.visible):not(.urgent) label {
   font-size: 0;
+}
+
+#workspaces.apps button {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+}
+
+#workspaces.apps > button:not(.empty) {
+  margin: 3px 4px;
+  padding: 0 3px;
+  border-radius: 11px;
+  background-color: alpha(currentColor, 0.14);
+}
+
+window#waybar.with-noctalia #workspaces.apps > button:not(.empty) {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+#workspaces.apps .taskbar-window {
+  margin: 3px 0;
+  padding: 1px 3px;
+  border-radius: 8px;
+}
+
+#workspaces.apps .taskbar-window.active,
+#workspaces.apps .taskbar-window:hover {
+  background-color: alpha(currentColor, 0.22);
 }
 
 #pulseaudio,

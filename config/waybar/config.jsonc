@@ -3,7 +3,7 @@
   "position": "top",
   "height": 28,
   "spacing": 2,
-  "modules-left": ["hyprland/window", "custom/workspace-layout", "hyprland/submap"],
+  "modules-left": ["hyprland/window", "hyprland/workspaces#apps", "custom/workspace-layout", "hyprland/submap"],
   "modules-center": ["hyprland/workspaces"],
   "modules-right": ["pulseaudio", "network", "bluetooth", "battery", "clock"],
 
@@ -13,10 +13,31 @@
     "tooltip": false
   },
   "hyprland/window": {
-    "format": "{}",
-    "max-length": 80,
+    "format": "{class}",
+    "rewrite": {
+      "(?:com|dev|io|net|org)(?:\\.[^.]+)+\\.([^.]+)": "$1",
+      "CosmicFiles": "COSMIC Files",
+      "firefox": "Firefox",
+      "ghostty": "Ghostty",
+      "TextEditor": "Text Editor",
+      "zen": "Zen Browser"
+    },
+    "max-length": 28,
     "separate-outputs": true,
-    "tooltip": true
+    "tooltip": false
+  },
+  "hyprland/workspaces#apps": {
+    "format": "{windows}",
+    "format-window-separator": "",
+    "active-only": true,
+    "all-outputs": false,
+    "max-windows": 6,
+    "workspace-taskbar": {
+      "enable": true,
+      "icon-size": 16,
+      "update-active-window": true,
+      "on-click-window": "if [ {button} = 1 ]; then hyprctl eval 'hl.dispatch(hl.dsp.focus({window = \"address:{address}\"}))'; fi"
+    }
   },
   "custom/workspace-layout": {
     "exec": "sh \"${XDG_CONFIG_HOME:-$HOME/.config}/waybar/workspace-layout.sh\"",
