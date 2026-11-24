@@ -79,6 +79,10 @@ pacman = ["waybar"]
 pacman = ["noctalia"]
 [packages.jq]
 pacman = ["jq"]
+[packages.freerdp]
+pacman = ["freerdp"]
+[packages.fzf]
+pacman = ["fzf"]
 
 # Used only when explicitly bootstrapping Homebrew.
 [packages.build-tools]

@@ -56,6 +56,7 @@ class LinkTests(unittest.TestCase):
         for app, destination, submodule in (
             ("codex", ".codex/dotfiles.config.toml", "config/ai"),
             ("opencode", ".config/opencode/dotfiles.config.json", "config/ai"),
+            ("freerdp", ".config/freerdp/rdp.zsh", "config/freerdp"),
             ("ghostty", ".config/ghostty/config.ghostty", "config/tty"),
             ("kitty", ".config/kitty/kitty.conf", "config/tty"),
         ):
@@ -68,6 +69,23 @@ class LinkTests(unittest.TestCase):
                                       "--recursive", "--", submodule])
                     self.assertTrue((self.home / destination).is_symlink())
         self.assertFalse((self.home / ".bashrc").exists())
+
+    def test_freerdp_only_links_shared_files_under_xdg(self):
+        xdg = self.home / "settings"
+        profile = xdg / "freerdp"
+        connections = profile / "connections"
+        connections.mkdir(parents=True)
+        local = connections / "workstation.rdp"
+        local.write_text("local configuration\n")
+        self.assertFalse(any("freerdp" in src for src in links.selected_files().values()))
+        env = dict(os.environ, HOME=str(self.home), XDG_CONFIG_HOME=str(xdg))
+        for action in ("install", "status"):
+            subprocess.run(["python3", str(links.ROOT / "scripts/links.py"), action, "--only", "freerdp"],
+                           env=env, check=True, capture_output=True)
+        for name in ("rdp.zsh", "sdl-freerdp.json", "connection.rdp.example"):
+            self.assertTrue(links.linked(profile / name, links.ROOT / "config/freerdp" / name))
+        self.assertFalse(profile.is_symlink())
+        self.assertEqual(local.read_text(), "local configuration\n")
 
     def test_terminal_install_migrates_only_legacy_dotfiles_links(self):
         ghostty = self.home / ".config/ghostty/config.ghostty"

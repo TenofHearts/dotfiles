@@ -19,7 +19,7 @@ if [[ " $* " != *" --dry-run "* ]]; then
         "") git -C "$ROOT" submodule update --init --recursive ;;
         codex|opencode) git -C "$ROOT" submodule update --init --recursive -- config/ai ;;
         ghostty|kitty) git -C "$ROOT" submodule update --init --recursive -- config/tty ;;
-        nvim|tmux) git -C "$ROOT" submodule update --init --recursive -- "config/$only" ;;
+        freerdp|nvim|tmux) git -C "$ROOT" submodule update --init --recursive -- "config/$only" ;;
     esac
 fi
 exec python3 "$ROOT/scripts/links.py" install "$@"

@@ -7,7 +7,7 @@ groups = ["core", "editors", "development"]
 core = ["git", "zsh", "zsh-autosuggestions", "zsh-syntax-highlighting", "tmux", "less", "ripgrep", "fd", "zoxide", "htop", "rsync", "wget", "unzip", "zip"]
 editors = ["vim", "neovim", "oh-my-posh"]
 development = ["python", "uv", "fnm", "rustup", "cmake", "pkgconf", "ccache"]
-desktop = ["hyprland", "waybar", "noctalia", "jq"]
+desktop = ["hyprland", "waybar", "noctalia", "jq", "freerdp", "fzf"]
 fun = ["cowsay", "fortune", "lolcat"]
 
 [software.oh-my-posh]

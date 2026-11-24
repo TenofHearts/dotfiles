@@ -8,7 +8,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_APPS = {"ghostty", "hyprland", "hypr-rdp", "kitty", "waybar", "noctalia", "rime", "shotori"}
+DESKTOP_APPS = {"freerdp", "ghostty", "hyprland", "hypr-rdp", "kitty", "waybar", "noctalia", "rime", "shotori"}
 FILES = {
     ".bashrc": "config/bash/.bashrc",
     ".zshrc": "config/zsh/.zshrc",
@@ -22,6 +22,9 @@ FILES = {
     ".config/ghostty/config.ghostty": "config/tty/ghostty/config.ghostty",
     ".config/ghostty/cursor_tail.glsl": "config/tty/ghostty/cursor_tail.glsl",
     ".config/kitty/kitty.conf": "config/tty/kitty/kitty.conf",
+    ".config/freerdp/sdl-freerdp.json": "config/freerdp/sdl-freerdp.json",
+    ".config/freerdp/connection.rdp.example": "config/freerdp/connection.rdp.example",
+    ".config/freerdp/rdp.zsh": "config/freerdp/rdp.zsh",
     ".config/waybar": "config/waybar",
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
     ".config/noctalia/zz-dotfiles-launcher.toml": "config/noctalia/zz-dotfiles-launcher.toml",
@@ -93,7 +96,7 @@ def xdg_root(home, variable, default):
 def destinations(home, only):
     for name, source in selected_files(only).items():
         dest = home / name
-        if application(source) in {"rime", "hyprland"} or (application(source) == "hypr-rdp" and name.startswith(".config/")):
+        if application(source) in {"freerdp", "rime", "hyprland"} or (application(source) == "hypr-rdp" and name.startswith(".config/")):
             base, variable = (".config", "XDG_CONFIG_HOME") if name.startswith(".config/") else (".local/share", "XDG_DATA_HOME")
             dest = xdg_root(home, variable, base) / Path(name).relative_to(base)
         yield dest, ROOT / source

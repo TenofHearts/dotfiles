@@ -262,5 +262,11 @@ fi
 
 unset _dotfiles_root
 
+# CachyOS packages the SDL FreeRDP client under its versioned name.
+if [[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/freerdp/rdp.zsh" ]]; then
+    export RDP_BIN="${RDP_BIN:-sdl-freerdp3}"
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/freerdp/rdp.zsh"
+fi
+
 # Machine-specific overrides run last. Keep these files outside the repository.
 [ ! -r "$HOME/.zshrc.local" ] || . "$HOME/.zshrc.local"
