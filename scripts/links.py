@@ -8,7 +8,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_APPS = {"ghostty", "hyprland", "kitty", "waybar", "noctalia", "rime", "shotori"}
+DESKTOP_APPS = {"ghostty", "hyprland", "kitty", "waybar", "noctalia", "rime"}
 FILES = {
     ".bashrc": "config/bash/.bashrc",
     ".zshrc": "config/zsh/.zshrc",
@@ -26,7 +26,6 @@ FILES = {
     ".config/noctalia/zz-dotfiles-bars.toml": "config/noctalia/zz-dotfiles-bars.toml",
     ".config/noctalia/zz-dotfiles-launcher.toml": "config/noctalia/zz-dotfiles-launcher.toml",
     ".config/noctalia/zz-dotfiles-templates.toml": "config/noctalia/zz-dotfiles-templates.toml",
-    ".config/shotori/settings.toml": "config/shotori/settings.toml",
     ".local/share/fcitx5/rime/default.custom.yaml": "config/rime/default.custom.yaml",
     ".local/share/fcitx5/rime/rime_ice.custom.yaml": "config/rime/rime_ice.custom.yaml",
     ".config/fcitx5/profile": "config/rime/fcitx5/profile",

@@ -272,7 +272,7 @@ class LinkTests(unittest.TestCase):
                                            '    error("local override reached")\nend\n')
         self.assertIn("local override reached", verify())
 
-    def test_desktop_input_and_capture_are_opt_in_and_preserve_user_data(self):
+    def test_desktop_input_is_opt_in_and_preserves_user_data(self):
         rime = self.home / ".local/share/fcitx5/rime"
         rime.mkdir(parents=True)
         learned = rime / "user.yaml"
@@ -280,11 +280,9 @@ class LinkTests(unittest.TestCase):
         links.install(self.home, False, force=True)
         self.assertEqual(list(rime.iterdir()), [learned])
         self.assertFalse((self.home / ".config/fcitx5").exists())
-        self.assertFalse((self.home / ".config/shotori").exists())
         links.install(self.home, False, only="rime", force=True)
         self.assertTrue((rime / "default.custom.yaml").is_symlink())
         self.assertEqual(learned.read_text(), "local state\n")
-        self.assertFalse((self.home / ".config/shotori").exists())
 
     def test_rime_install_and_status_use_fcitx_xdg_roots(self):
         config, data = self.home / "settings", self.home / "data"

@@ -29,7 +29,7 @@ hl.bind("ALT + SHIFT + Tab", dsp.exec_cmd("noctalia msg window-switcher hold wor
 hl.bind("ALT + m", dsp.window.close(), universal)
 hl.bind("ALT + q", dsp.window.kill(), universal)
 hl.bind("ALT + space", dsp.exec_cmd("noctalia msg panel-toggle launcher"))
-hl.bind("ALT + SHIFT + s", dsp.exec_cmd("shotori gui"), universal)
+hl.bind("ALT + SHIFT + s", dsp.exec_cmd("Snipaste snip"), universal)
 hl.bind(command_key, function()
     hl.dispatch(dsp.submap(hl.get_current_submap() == "Command" and "reset" or "Command"))
 end, universal)
