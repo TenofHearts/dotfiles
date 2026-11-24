@@ -1,10 +1,6 @@
-# Dotfiles
+# Linux dotfiles
 
-Personal Linux dotfiles for Ubuntu under WSL and native CachyOS.
-
-## Quick start
-
-Configuration setup requires Bash, Git, and Python 3.6+. Keep the checkout in a stable location: the installed files are symlinks into it.
+For CachyOS and [Ubuntu under WSL](platform/wsl-ubuntu/README.md). Install Bash, Git, and Python 3.6+ first. Keep the checkout in place: the installed configurations are symlinks.
 
 ```sh
 git clone --recurse-submodules https://github.com/TenofHearts/dotfiles.git
@@ -14,27 +10,19 @@ cd dotfiles
 python3 scripts/links.py status
 ```
 
-`install.sh` skips existing configurations and does not install packages. Use `--only APP` to link one profile. **`--force` deletes conflicting files or directories without a backup.**
+To install one profile, use `./install.sh --only NAME`. Run `./install.sh --help` for the names. Desktop profiles are opt-in. Existing files are skipped; **`--force` deletes conflicts without a backup**.
 
-## Optional software
+## Packages
 
-Review the manifest for [Ubuntu under WSL](software/manifests/wsl-ubuntu.toml) or [CachyOS](software/manifests/cachyos.toml). Software management requires Python 3.11+, or Python 3.8+ with `tomli`.
+`install.sh` only links files. To install packages as well, preview with `./bootstrap.sh --dry-run`, then run `./bootstrap.sh`. This requires Python 3.11+, or Python 3.8+ with `tomli`. For the optional CachyOS desktop packages, use `./scripts/software.py install --group desktop`. See [Node and Rust setup](runtimes/README.md) for toolchains.
 
-```sh
-./scripts/software.py plan   # Preview package commands for this host
-./bootstrap.sh               # Install missing packages, then link configurations
-```
+## Profiles
 
-Desktop packages are opt-in on CachyOS (`./scripts/software.py plan --group desktop`). For Node or Rust setup after installation, see the [runtime guide](runtimes/README.md).
-
-## Desktop setup
-
-Desktop configuration links are opt-in. Run `./install.sh --only APP` for each profile you use; `./install.sh --help` lists the names.
-
-- **Kitty and Ghostty** use the [TTY submodule](https://github.com/TenofHearts/tty-config) at `config/tty`. Run `./install.sh --only kitty` or `./install.sh --only ghostty` to install or migrate the corresponding dotfiles symlinks. Install `ttf-0xproto-nerd` on CachyOS for the shared 12 pt font. If you manage your own terminal profile, review the submodule settings before merging them into your profile.
-- **Hyprland:** `./install.sh --only hyprland` links the [CachyOS-based profile](config/hyprland/hyprland.lua), its [settings modules](config/hyprland/config), and the [shared shortcuts](config/hyprland/help.html) as individual files. `~/.config/hypr` and its `config/` subdirectory stay real directories. Keep login commands in `config/autostart.lua`, environment settings in `config/environment.lua`, and final overrides in `config/local.lua` under `~/.config/hypr/`. All three are optional and never installed or replaced. Back up any conflicting shared files before using `--force`. If upgrading from the old whole-directory symlink, move the **symlink itself** aside first and preserve any local-only files from its target.
-- **Hyprland RDP:** An [optional drop-in for `hypr-rdp.service`](platform/cachyos/hypr-rdp/README.md) hands workspaces to RDP on connect and restores them on disconnect. Linking the RDP profile does not change login enablement.
-- **Waybar with Noctalia:** Link `waybar` and `noctalia`. In the existing Noctalia session, launch `waybar -c ~/.config/waybar/with-noctalia.jsonc` once at login.
-- **Rime:** Follow the [Fcitx5 deployment guide](config/rime/README.md) to install the pinned schema and link the input profile.
-
-For app-specific setup, see [Neovim](config/nvim/README.md), [tmux](config/tmux/README.md), and [AI tools](config/ai/README.md).
+- [Neovim](config/nvim/README.md): `./install.sh --only nvim`. Use Neovim 0.12+, Git, ripgrep, and fd; start `nvim` once to install plugins. Pyright needs Node/npm.
+- [tmux](config/tmux/README.md): `./install.sh --only tmux`. Use tmux 3.2+, Git, and `less`.
+- [Codex and OpenCode](config/ai/README.md): install the CLI, then link `codex` or `opencode`. For OpenCode, keep the gateway key in `~/.config/opencode/thirdparty.key` (mode `0600`).
+- Kitty or Ghostty: link `kitty` or `ghostty` and install `ttf-0xproto-nerd` on CachyOS.
+- Hyprland: link `hyprland`. If upgrading from a whole-directory `~/.config/hypr` symlink, preserve local files and move the symlink aside first. See the [shortcut help](config/hyprland/help.html).
+- Waybar with Noctalia: link `waybar` and `noctalia`, then run `waybar -c ~/.config/waybar/with-noctalia.jsonc` at login.
+- [FreeRDP client](config/freerdp/README.md): on CachyOS, run `./scripts/software.py install freerdp fzf`, then `./install.sh --only freerdp`. Open a new dotfiles Zsh shell.
+- Follow the [hypr-rdp service guide](platform/cachyos/hypr-rdp/README.md) or [Rime input method guide](config/rime/README.md) for those profiles.

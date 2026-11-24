@@ -1,11 +1,11 @@
 # WSL Ubuntu
 
-`bootstrap.sh` selects `software/manifests/wsl-ubuntu.toml` on this platform. The CachyOS manifest is selected only on native CachyOS. Run `check.sh` for a standalone WSL Ubuntu check.
+Inside Ubuntu on WSL2, run these commands as your normal user from the repository root. Bootstrap requires Bash, Git, and Python 3.11+ (or 3.8+ with `tomli`).
 
-The platform guard intentionally keeps environment detection separate from Linux distribution detection:
+```sh
+./platform/wsl-ubuntu/check.sh   # Confirm this is Ubuntu under WSL
+./bootstrap.sh --dry-run         # Preview package installation and configuration links
+./bootstrap.sh
+```
 
-- WSL is detected from the kernel release.
-- Ubuntu is detected from `/etc/os-release`.
-- Native software provisioning selects the `apt` adapter.
-
-Platform-specific settings such as proxy variables remain in `~/.zshrc.local` or `~/.bashrc.local`. Nothing in this directory is sourced automatically by the shared shell configuration.
+Bootstrap installs the [WSL packages](../../software/manifests/wsl-ubuntu.toml) using apt and Homebrew. Open a new shell to use the linked configuration. Keep machine-specific settings such as proxy variables in `~/.zshrc.local` or `~/.bashrc.local`.
