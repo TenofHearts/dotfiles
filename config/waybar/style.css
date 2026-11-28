@@ -69,7 +69,8 @@ window#waybar.with-noctalia #custom-workspace-layout {
 }
 
 window#waybar.with-noctalia .modules-center #workspaces button {
-  margin: 8px 1px 9px;
+  min-height: 17px;
+  margin: 6px 1px 7px;
 }
 
 .modules-center #workspaces button.active {
@@ -112,12 +113,12 @@ window#waybar .modules-center #workspaces button.empty:not(.active):not(.visible
 }
 
 window#waybar.with-noctalia #workspaces.apps > button:not(.empty) {
-  margin-top: 6px;
+  margin-top: 5px;
   margin-bottom: 6px;
 }
 
 #workspaces.apps .taskbar-window {
-  margin: 3px 0;
+  margin: 2px 0 3px;
   padding: 1px 3px;
   border-radius: 8px;
 }
