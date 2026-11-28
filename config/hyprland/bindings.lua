@@ -81,6 +81,9 @@ local function cycle_layout()
         end
     end
     hl.workspace_rule({ workspace = ws.addressable_name, layout = next_layout })
+    if WORKSPACE_LAYOUT_STATE then
+        WORKSPACE_LAYOUT_STATE.set(ws.addressable_name, next_layout)
+    end
 end
 
 local resize_presets = { 0.25, 0.33, 0.50, 1.0 }
